@@ -1,0 +1,5 @@
+.git
+node_modules
+backend/config/config.env
+config.env
+.env

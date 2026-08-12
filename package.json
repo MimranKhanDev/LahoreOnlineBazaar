@@ -1,0 +1,30 @@
+{
+  "name": "lahoreonlinebazaar",
+  "version": "1.0.0",
+  "description": "",
+  "main": "backend/app.js",
+  "type": "module",
+  "scripts": {
+    "start": "node backend/app.js",
+    "dev": "nodemon backend/app.js",
+    "prod": "nodemon backend/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MimranKhanDev/LahoreOnlineBazaar.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MimranKhanDev/LahoreOnlineBazaar/issues"
+  },
+  "homepage": "https://github.com/MimranKhanDev/LahoreOnlineBazaar#readme",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongodb": "^7.5.0",
+    "mongoose": "^9.9.2",
+    "nodemon": "^3.1.14"
+  }
+}
