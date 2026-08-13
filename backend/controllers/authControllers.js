@@ -77,35 +77,27 @@ export const uploadAvatar = catchAsyncErrors(async (req, res, next) => {
 export const forgotPassword = catchAsyncErrors(async (req, res, next) => {
   // Find user in the database
   const user = await User.findOne({ email: req.body.email });
-
   if (!user) {
     return next(new ErrorHandler("User not found with this email", 404));
   }
-
   // Get reset password token
   const resetToken = user.getResetPasswordToken();
-
   await user.save();
-
   // Create reset password url
   const resetUrl = `${req.protocol}://${req.get("host")}/password/reset/${resetToken}`;
-
   const message = getResetPasswordTemplate(user?.name, resetUrl);
-
   try {
     await sendEmail({
       email: user.email,
       subject: "ShopIT-V3 Password Recovery",
       message,
     });
-
     res.status(200).json({
       message: `Email sent to: ${user.email}`,
     });
   } catch (error) {
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
-
     await user.save();
     return next(new ErrorHandler(error?.message, 500));
   }
@@ -118,12 +110,10 @@ export const resetPassword = catchAsyncErrors(async (req, res, next) => {
     .createHash("sha256")
     .update(req.params.token)
     .digest("hex");
-
   const user = await User.findOne({
     resetPasswordToken,
     resetPasswordExpire: { $gt: Date.now() },
   });
-
   if (!user) {
     return next(
       new ErrorHandler(
@@ -132,26 +122,20 @@ export const resetPassword = catchAsyncErrors(async (req, res, next) => {
       ),
     );
   }
-
   if (req.body.password !== req.body.confirmPassword) {
     return next(new ErrorHandler("Passwords does not match", 400));
   }
-
   // Set the new password
   user.password = req.body.password;
-
   user.resetPasswordToken = undefined;
   user.resetPasswordExpire = undefined;
-
   await user.save();
-
   sendToken(user, 200, res);
 });
 
 // Get current user profile  =>  /api/v1/me
 export const getUserProfile = catchAsyncErrors(async (req, res, next) => {
   const user = await User.findById(req?.user?._id);
-
   res.status(200).json({
     user,
   });
