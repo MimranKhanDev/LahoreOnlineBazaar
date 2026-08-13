@@ -23,14 +23,14 @@ dotenv.config({ path: envFilePath });
 // Connecting to database
 connectDatabase();
 
-// app.use(
-//   express.json({
-//     limit: "10mb",
-//     verify: (req, res, buf) => {
-//       req.rawBody = buf.toString();
-//     },
-//   }),
-// );
+app.use(
+  express.json({
+    limit: "10mb",
+    verify: (req, res, buf) => {
+      req.rawBody = buf.toString();
+    },
+  }),
+);
 // app.use(cookieParser());
 
 // Import all routes
