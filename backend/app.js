@@ -1,7 +1,8 @@
 import express from "express";
 const app = express();
 import dotenv from "dotenv";
-// import cookieParser from "cookie-parser";
+import cookieParser from "cookie-parser";
+
 import { connectDatabase } from "./config/dbConnect.js";
 import errorMiddleware from "./middlewares/errors.js";
 
@@ -31,18 +32,16 @@ app.use(
     },
   }),
 );
-// app.use(cookieParser());
+app.use(cookieParser());
 
 // Import all routes
 import productRoutes from "./routes/products.js";
-// import authRoutes from "./routes/auth.js";
-// import orderRoutes from "./routes/order.js";
-// import paymentRoutes from "./routes/payment.js";
+import authRoutes from "./routes/auth.js";
+import orderRoutes from "./routes/order.js";
 
 app.use("/api/v1", productRoutes);
-// app.use("/api/v1", authRoutes);
-// app.use("/api/v1", orderRoutes);
-// app.use("/api/v1", paymentRoutes);
+app.use("/api/v1", authRoutes);
+app.use("/api/v1", orderRoutes);
 
 // if (process.env.NODE_ENV === "PRODUCTION") {
 //   app.use(express.static(path.join(__dirname, "../client/build")));
@@ -53,7 +52,13 @@ app.use("/api/v1", productRoutes);
 // }
 
 // Using error middleware
-// app.use(errorMiddleware);
+app.use((req, res) => {
+  res.status(404).json({
+    message: "Route not found",
+  });
+});
+
+app.use(errorMiddleware);
 
 const port = process.env.PORT || 4000;
 

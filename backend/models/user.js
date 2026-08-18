@@ -35,11 +35,22 @@ const userSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-// Encrypting password before saving the user
-userSchema.pre("save", async function (next) {
+// OLD CODE — BUGGY: in Mongoose async pre-save middleware, the callback is not passed in the same way, so next is undefined and the hook crashes.
+// userSchema.pre("save", async function (next) {
+//   if (!this.isModified("password")) {
+//     return next();
+//   }
+//
+//   this.password = await bcrypt.hash(this.password, 10);
+//   next();
+// });
+
+// NEW CODE — FIX: Mongoose async pre-save hooks should not use the callback pattern; they should return a promise and hash only when needed.
+userSchema.pre("save", async function () {
   if (!this.isModified("password")) {
-    next();
+    return;
   }
+
   this.password = await bcrypt.hash(this.password, 10);
 });
 

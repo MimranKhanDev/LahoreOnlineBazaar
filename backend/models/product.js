@@ -24,11 +24,11 @@ const productSchema = new mongoose.Schema(
       {
         public_id: {
           type: String,
-          // required: true,
+          required: true,
         },
         url: {
           type: String,
-          // required: true,
+          required: true,
         },
       },
     ],
@@ -74,28 +74,28 @@ const productSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    // reviews: [
-    //   {
-    //     user: {
-    //       type: mongoose.Schema.Types.ObjectId,
-    //       ref: "User",
-    //       required: true,
-    //     },
-    //     rating: {
-    //       type: Number,
-    //       required: true,
-    //     },
-    //     comment: {
-    //       type: String,
-    //       required: true,
-    //     },
-    //   },
-    // ],
-    // user: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: "User",
-    //   required: true,
-    // },
+    reviews: [
+      {
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+          // required: true,
+        },
+        rating: {
+          type: Number,
+          required: true,
+        },
+        comment: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      // required: true,
+    },
   },
   { timestamps: true },
 );
