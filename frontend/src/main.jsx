@@ -1,41 +1,45 @@
-// import { StrictMode } from "react";
-// import { createRoot } from "react-dom/client";
-// import App from "./App.jsx";
-// import "./index.css";
-
-// createRoot(document.getElementById("root")).render(
-//   <StrictMode>
-//     <App />
-//   </StrictMode>,
-// );
+// src/main.jsx
 
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App";
-import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
+import { HelmetProvider } from "react-helmet-async";
+import { Toaster } from "react-hot-toast"; // ✅ Modern toast notification
 import store from "./store";
-import { positions, transitions, Provider as AlertProvider } from "react-alert";
-import AlertTemplate from "react-alert-template-basic";
+import App from "./App";
+import "./index.css"; // ✅ Tailwind CSS
 
-/**
- * Alert configuration for notifications
- * - position: top center
- * - timeout: 5 seconds
- */
-const options = {
-  timeout: 5000,
-  position: positions.BOTTOM_CENTER,
-  transition: transitions.SCALE,
-};
-
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(
+ReactDOM.createRoot(document.getElementById("root")).render(
   <Provider store={store}>
-    <AlertProvider template={AlertTemplate} {...options}>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </AlertProvider>
+    <HelmetProvider>
+      <App />
+      {/* ✅ Toast notifications - works everywhere */}
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: "#333",
+            color: "#fff",
+            padding: "16px",
+            borderRadius: "10px",
+          },
+          success: {
+            duration: 3000,
+            style: {
+              background: "#22c55e",
+              color: "#fff",
+            },
+          },
+          error: {
+            duration: 4000,
+            style: {
+              background: "#ef4444",
+              color: "#fff",
+            },
+          },
+        }}
+      />
+    </HelmetProvider>
   </Provider>,
 );
