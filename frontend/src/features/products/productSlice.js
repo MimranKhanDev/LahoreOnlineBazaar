@@ -197,6 +197,12 @@ const productSlice = createSlice({
       state.productLoading = false;
       state.productError = null;
     },
+    // ✅ NEW: Reset review state after submission
+    resetReviewState: (state) => {
+      state.reviewSuccess = false;
+      state.reviewLoading = false;
+      state.reviewError = null;
+    },
   },
 
   extraReducers: (builder) => {
@@ -354,8 +360,12 @@ const productSlice = createSlice({
 /**
  * 📤 EXPORT SYNC ACTIONS
  */
-export const { clearErrors, clearProductStatus, resetProduct } =
-  productSlice.actions;
+export const {
+  clearErrors,
+  clearProductStatus,
+  resetProduct,
+  resetReviewState, // ✅ NEW: Export the reset action
+} = productSlice.actions;
 
 /**
  * 📤 EXPORT SELECTORS
@@ -364,6 +374,18 @@ export const selectProducts = (state) => state.products.products;
 export const selectProductLoading = (state) => state.products.loading;
 export const selectProductError = (state) => state.products.error;
 export const selectProductDetails = (state) => state.products.product;
+export const selectProductDetailsLoading = (state) =>
+  state.products.productLoading;
+export const selectProductDetailsError = (state) => state.products.productError;
+export const selectProductsCount = (state) => state.products.productsCount;
+export const selectResultPerPage = (state) => state.products.resultPerPage;
+export const selectFilteredProductsCount = (state) =>
+  state.products.filteredProductsCount;
+
+// ✅ NEW: Review selectors
+export const selectReviewSuccess = (state) => state.products.reviewSuccess;
+export const selectReviewLoading = (state) => state.products.reviewLoading;
+export const selectReviewError = (state) => state.products.reviewError;
 
 /**
  * 📤 EXPORT REDUCER

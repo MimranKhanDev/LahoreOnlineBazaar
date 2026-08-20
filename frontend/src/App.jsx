@@ -16,9 +16,9 @@ import Header from "./components/layout/Header/Header";
 import Footer from "./components/layout/Footer/Footer";
 import Home from "./components/Home/Home";
 // ⚠️ Comment out components that don't exist yet
-// import ProductDetails from "./components/Product/ProductDetails";
-// import Products from "./components/Product/Products";
-// import Search from "./components/Product/Search";
+import ProductDetails from "./components/Product/ProductDetails";
+import Products from "./components/Product/Products";
+import Search from "./components/Product/Search";
 // import LoginSignUp from "./components/User/LoginSignUp";
 // import UserOptions from "./components/layout/Header/UserOptions";
 // import Profile from "./components/User/Profile";
@@ -114,12 +114,12 @@ function App() {
         <Route path="/about" element={<About />} />
 
         {/* ⚠️ Commented out routes for components not created yet */}
-        {/* <Route path="/product/:id" element={<ProductDetails />} />
+        <Route path="/product/:id" element={<ProductDetails />} />
         <Route path="/products" element={<Products />} />
         <Route path="/products/:keyword" element={<Products />} />
         <Route path="/search" element={<Search />} />
-        <Route path="/login" element={<LoginSignUp />} />
-        <Route path="/cart" element={<Cart />} /> */}
+        {/* <Route path="/login" element={<LoginSignUp />} /> */}
+        {/* <Route path="/cart" element={<Cart />} /> */}
 
         {/* 🔒 Protected Routes - Commented out */}
         {/* <Route element={<ProtectedRoute />}>
