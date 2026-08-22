@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import Rating from "@mui/material/Rating";
 import { motion } from "framer-motion";
 import { AiOutlineHeart } from "react-icons/ai"; // Wishlist icon
+import toast from "react-hot-toast";
 
 const ProductCard = ({ product }) => {
   const options = {
@@ -91,7 +92,7 @@ const ProductCard = ({ product }) => {
 
         {/* Stock Status */}
         <div className="mt-3">
-          {product.stock > 0 ? (
+          {product.Stock > 0 ? (
             <span className="text-xs text-green-600 bg-green-50 px-3 py-1 rounded-full">
               In Stock
             </span>

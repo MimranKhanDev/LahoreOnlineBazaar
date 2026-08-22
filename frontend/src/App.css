@@ -1,0 +1,35 @@
+/* src/App.css */
+
+/**
+ * 🎨 CUSTOM STYLES - App-specific styles
+ * 
+ * This file is for custom CSS that doesn't use Tailwind
+ * Currently empty because we use Tailwind for everything
+ * 
+ * 🌟 THINK OF IT LIKE:
+ *    - Tailwind = Pre-built furniture (ready to use)
+ *    - App.css = Custom furniture (build yourself)
+ * 
+ * 💡 When to use this file:
+ *    1. Custom animations not in Tailwind
+ *    2. Complex CSS that's hard with Tailwind
+ *    3. Third-party component styling (like MUI)
+ *    4. Very specific one-off styles
+ * 
+ * 💡 When NOT to use this file:
+ *    1. Use Tailwind classes instead (faster, cleaner)
+ *    2. Keep it minimal - Tailwind is enough for most things
+ * 
+ * 📝 You can add custom styles here when needed
+ *    Example: 
+ *    .custom-animation {
+ *      animation: slideIn 0.5s ease-out;
+ *    }
+ *    
+ *    @keyframes slideIn {
+ *      from { transform: translateX(-100%); }
+ *      to { transform: translateX(0); }
+ *    }
+ */
+
+/* If needed, add custom styles here */

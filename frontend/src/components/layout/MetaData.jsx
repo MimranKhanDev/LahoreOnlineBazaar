@@ -4,11 +4,14 @@ import React from "react";
 import { Helmet } from "react-helmet-async";
 
 const MetaData = ({ title, description, keywords, image, url }) => {
-  const siteTitle = title ? `${title} | ECOMMERCE` : "ECOMMERCE - Shop Now";
+  const siteTitle = title
+    ? `${title} | LahoreOnlineBazaar`
+    : "LahoreOnlineBazaar - Shop Now";
   const siteDescription =
     description || "Your one-stop shop for amazing products at the best prices";
-  const siteKeywords = keywords || "ecommerce, shop, buy online, products";
-  const siteImage = image || "https://yourdomain.com/og-image.jpg";
+  const siteKeywords =
+    keywords || "LahoreOnlineBazaar, shop, buy online, products";
+  const siteImage = image || " ";
   const siteUrl = url || window.location.href;
 
   return (
@@ -27,7 +30,7 @@ const MetaData = ({ title, description, keywords, image, url }) => {
       <meta property="og:image" content={siteImage} />
       <meta property="og:url" content={siteUrl} />
       <meta property="og:type" content="website" />
-      <meta property="og:site_name" content="ECOMMERCE" />
+      <meta property="og:site_name" content="LahoreOnlineBazaar" />
 
       {/* Twitter Card Tags */}
       <meta name="twitter:card" content="summary_large_image" />

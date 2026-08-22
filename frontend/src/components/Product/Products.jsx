@@ -2,18 +2,17 @@
 
 /**
  * 📋 PRODUCTS - Displays product listing with filters
- *
  * Features:
  * 1. Product grid with cards
  * 2. Price filter (slider) - Using @mui/material/Slider
  * 3. Category filter - Using @mui/material/Chip
  * 4. Rating filter - Using @mui/material/Slider
- * 5. Pagination - Using react-js-pagination (works with React 18)
+ * 5. Pagination - Using react-js-pagination
  * 6. Search functionality
  *
  * 📦 Packages Used:
  * - @mui/material: v5+ (Slider, Chip, Typography)
- * - react-js-pagination: v3+ (works with React 18)
+ * - react-js-pagination: v3+
  * - framer-motion: v9+ (animations)
  */
 
@@ -21,8 +20,8 @@ import React, { Fragment, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
-import Pagination from "react-js-pagination"; // ✅ v3+ works with React 18
-import { Slider, Typography, Chip } from "@mui/material"; // ✅ MUI v5
+import Pagination from "react-js-pagination";
+import { Slider, Typography, Chip } from "@mui/material";
 import {
   FaFilter,
   FaStar,
@@ -53,13 +52,13 @@ const Products = () => {
 
   // 🎯 State
   const [currentPage, setCurrentPage] = useState(1);
-  const [price, setPrice] = useState([0, 25000]);
+  const [price, setPrice] = useState([0, 1000000]);
   const [category, setCategory] = useState("");
   const [ratings, setRatings] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
 
   // 📊 Selectors
-  const products = useSelector(selectProducts);
+  const products = useSelector(selectProducts) || [];
   const loading = useSelector(selectProductLoading);
   const error = useSelector(selectProductError);
   const productsCount = useSelector(selectProductsCount);
@@ -80,7 +79,6 @@ const Products = () => {
 
   /**
    * 📄 Handle page change
-   * Updates current page and scrolls to top
    */
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -96,11 +94,10 @@ const Products = () => {
 
   /**
    * 🏷️ Handle category click - Toggle category selection
-   * If clicked category is already selected, deselect it
    */
   const handleCategoryClick = (categoryName) => {
     setCategory(categoryName === category ? "" : categoryName);
-    setCurrentPage(1); // Reset to first page
+    setCurrentPage(1);
   };
 
   /**
@@ -108,12 +105,11 @@ const Products = () => {
    */
   const handleRatingsChange = (event, newRating) => {
     setRatings(newRating);
-    setCurrentPage(1); // Reset to first page
+    setCurrentPage(1);
   };
 
   /**
    * 🔄 Clear all filters
-   * Resets price, category, and ratings to default
    */
   const clearFilters = () => {
     setPrice([0, 25000]);
@@ -124,13 +120,11 @@ const Products = () => {
 
   // 🔄 Fetch products when filters change
   useEffect(() => {
-    // Show error if any
     if (error) {
       toast.error(error);
       dispatch(clearErrors());
     }
 
-    // Fetch products with current filters
     dispatch(
       getProducts({
         keyword: keyword || "",
@@ -157,7 +151,7 @@ const Products = () => {
                 {keyword ? `Results for "${keyword}"` : "All Products"}
               </h1>
               <p className="text-gray-500">
-                {filteredProductsCount} products found
+                {filteredProductsCount || 0} products found
               </p>
             </div>
 
@@ -170,7 +164,6 @@ const Products = () => {
                       <FaFilter className="text-red-500" />
                       Filters
                     </h3>
-                    {/* Show Clear All button only if any filter is active */}
                     {(price[0] > 0 ||
                       price[1] < 25000 ||
                       category ||
@@ -184,7 +177,7 @@ const Products = () => {
                     )}
                   </div>
 
-                  {/* Price Filter - Using MUI Slider */}
+                  {/* Price Filter */}
                   <div className="mb-6">
                     <Typography className="font-semibold mb-2">
                       Price Range
@@ -211,7 +204,7 @@ const Products = () => {
                     </div>
                   </div>
 
-                  {/* Category Filter - Using MUI Chip */}
+                  {/* Category Filter */}
                   <div className="mb-6">
                     <Typography className="font-semibold mb-2">
                       Categories
@@ -278,7 +271,6 @@ const Products = () => {
                   <div className="flex items-center gap-2">
                     <FaFilter className="text-red-500" />
                     <span className="font-semibold">Filters</span>
-                    {/* Show Active badge if any filter is applied */}
                     {(price[0] > 0 ||
                       price[1] < 25000 ||
                       category ||
@@ -293,7 +285,6 @@ const Products = () => {
                   </span>
                 </button>
 
-                {/* Mobile Filter Panel - Animated with framer-motion */}
                 {showFilters && (
                   <motion.div
                     initial={{ height: 0, opacity: 0 }}
@@ -301,7 +292,6 @@ const Products = () => {
                     exit={{ height: 0, opacity: 0 }}
                     className="bg-white rounded-2xl shadow-lg p-6 mt-4"
                   >
-                    {/* Same content as desktop sidebar */}
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-bold">Filters</h3>
                       {(price[0] > 0 ||
@@ -412,7 +402,6 @@ const Products = () => {
                     )}
                   </>
                 ) : (
-                  // No products found state
                   <div className="text-center py-20 bg-white rounded-3xl shadow-lg">
                     <div className="text-6xl mb-4">🔍</div>
                     <h3 className="text-2xl font-bold text-gray-700 mb-2">

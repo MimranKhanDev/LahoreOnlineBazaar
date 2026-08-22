@@ -4,7 +4,7 @@
  * 🛒 PRODUCT DETAILS - Displays single product with reviews
  *
  * This component shows:
- * 1. Product images (carousel) - Using react-material-ui-carousel
+ * 1. Product images (carousel)
  * 2. Product details (name, price, description)
  * 3. Quantity selector
  * 4. Add to cart functionality
@@ -18,9 +18,9 @@ import React, { Fragment, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
-import Carousel from "react-material-ui-carousel"; // ✅ v3+ works with MUI v5
-import toast from "react-hot-toast"; // ✅ Modern toast
-import Rating from "@mui/material/Rating"; // ✅ MUI v5
+import Carousel from "react-material-ui-carousel";
+import toast from "react-hot-toast";
+import Rating from "@mui/material/Rating";
 import {
   Dialog,
   DialogActions,
@@ -29,7 +29,7 @@ import {
   Button,
   CircularProgress,
   Chip,
-} from "@mui/material"; // ✅ MUI v5
+} from "@mui/material";
 import {
   FaMinus,
   FaPlus,
@@ -48,6 +48,8 @@ import {
   createReview,
   resetReviewState,
   selectProductDetails,
+  selectProductDetailsLoading,
+  selectProductDetailsError,
 } from "../../features/products/productSlice";
 
 // ✅ Cart actions
@@ -63,13 +65,22 @@ const ProductDetails = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // 📊 Get product details from Redux
-  const { product, loading, error } = useSelector(selectProductDetails);
+  // OLD CODE — BUGGY: selectProductDetails returns the product object itself, not an object containing product/loading/error.
+  // const productState = useSelector(selectProductDetails) || {};
+  // const { product = null, loading = false, error = null } = productState;
 
-  // 📊 Get review state from Redux
-  const { reviewSuccess, reviewLoading, reviewError } = useSelector(
-    (state) => state.products,
-  );
+  // NEW CODE — FIX: read the product and its loading/error state from their actual Redux selectors.
+  const product = useSelector(selectProductDetails);
+  const loading = useSelector(selectProductDetailsLoading);
+  const error = useSelector(selectProductDetailsError);
+
+  // ✅ FIXED: Safe destructuring for review state
+  const reviewState = useSelector((state) => state.products) || {};
+  const {
+    reviewSuccess = false,
+    reviewLoading = false,
+    reviewError = null,
+  } = reviewState;
 
   // 🎨 Local state
   const [quantity, setQuantity] = useState(1);
@@ -110,12 +121,16 @@ const ProductDetails = () => {
    * 🛒 Add product to cart
    */
   const addToCartHandler = () => {
-    // Create cart item object
+    if (!product || !product._id) {
+      toast.error("Product not available");
+      return;
+    }
+
     const cartItem = {
       product: product._id,
       name: product.name,
       price: product.price,
-      image: product.images[0]?.url,
+      image: product.images?.[0]?.url || "",
       stock: product.Stock,
       quantity: quantity,
     };
@@ -168,6 +183,8 @@ const ProductDetails = () => {
    * 📤 Share product (uses Web Share API or clipboard fallback)
    */
   const shareProduct = () => {
+    if (!product) return;
+
     if (navigator.share) {
       navigator.share({
         title: product.name,
@@ -182,33 +199,32 @@ const ProductDetails = () => {
 
   // 🔄 Effects - Runs when component mounts or dependencies change
   useEffect(() => {
-    // Show error if any
     if (error) {
       toast.error(error);
       dispatch(clearErrors());
     }
 
-    // Show review error if any
     if (reviewError) {
       toast.error(reviewError);
       dispatch(clearErrors());
     }
 
-    // Handle successful review submission
     if (reviewSuccess) {
       toast.success("Review submitted successfully! 🎉");
-      dispatch(resetReviewState()); // Reset review state
-      setOpenReviewDialog(false); // Close dialog
-      // Refresh product details to show new review
+      dispatch(resetReviewState());
+      setOpenReviewDialog(false);
       dispatch(getProductDetails(id));
     }
 
-    // Fetch product details when component mounts or ID changes
-    dispatch(getProductDetails(id));
+    if (id) {
+      dispatch(getProductDetails(id));
+    }
   }, [dispatch, id, error, reviewError, reviewSuccess]);
 
   // ⏳ Loading state
-  if (loading) return <Loader />;
+  if (loading) {
+    return <Loader />;
+  }
 
   // 🚫 Product not found
   if (!product || !product._id) {
@@ -218,6 +234,9 @@ const ProductDetails = () => {
           <h2 className="text-3xl font-bold text-gray-700">
             Product Not Found
           </h2>
+          <p className="text-gray-500 mt-2">
+            The product you're looking for doesn't exist.
+          </p>
           <button
             onClick={() => navigate("/products")}
             className="mt-4 px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
@@ -279,11 +298,14 @@ const ProductDetails = () => {
                   {product.images?.map((item, i) => (
                     <motion.img
                       key={i}
-                      src={item.url}
+                      src={item.url || "/placeholder.jpg"}
                       alt={`${product.name} - ${i + 1}`}
                       className="w-full h-[400px] md:h-[500px] object-contain p-4"
                       whileHover={{ scale: 1.02 }}
                       transition={{ duration: 0.3 }}
+                      onError={(e) => {
+                        e.target.src = "/placeholder.jpg";
+                      }}
                     />
                   ))}
                 </Carousel>
@@ -305,9 +327,12 @@ const ProductDetails = () => {
                       }`}
                     >
                       <img
-                        src={item.url}
+                        src={item.url || "/placeholder.jpg"}
                         alt={`Thumbnail ${i + 1}`}
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.src = "/placeholder.jpg";
+                        }}
                       />
                     </motion.button>
                   ))}
@@ -388,6 +413,7 @@ const ProductDetails = () => {
                     onClick={decreaseQuantity}
                     disabled={quantity <= 1}
                     className="px-4 py-2 bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    aria-label="Decrease quantity"
                   >
                     <FaMinus className="text-sm" />
                   </button>
@@ -395,12 +421,16 @@ const ProductDetails = () => {
                     type="number"
                     readOnly
                     value={quantity}
+                    id="quantity"
+                    name="quantity"
                     className="w-16 text-center py-2 bg-white outline-none font-semibold"
+                    aria-label="Quantity"
                   />
                   <button
                     onClick={increaseQuantity}
                     disabled={product.Stock <= quantity}
                     className="px-4 py-2 bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    aria-label="Increase quantity"
                   >
                     <FaPlus className="text-sm" />
                   </button>
@@ -412,6 +442,7 @@ const ProductDetails = () => {
                   onClick={addToCartHandler}
                   disabled={product.Stock < 1}
                   className="flex-1 min-w-[180px] px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-semibold hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                  aria-label="Add to cart"
                 >
                   <FaShoppingCart />
                   {product.Stock < 1 ? "Out of Stock" : "Add to Cart"}
@@ -425,6 +456,7 @@ const ProductDetails = () => {
                   whileTap={{ scale: 0.95 }}
                   onClick={toggleWishlist}
                   className="px-4 py-2 border-2 border-gray-300 rounded-xl hover:border-red-500 transition-all flex items-center gap-2"
+                  aria-label="Toggle wishlist"
                 >
                   <FaHeart
                     className={isWishlisted ? "text-red-500" : "text-gray-400"}
@@ -439,6 +471,7 @@ const ProductDetails = () => {
                   whileTap={{ scale: 0.95 }}
                   onClick={shareProduct}
                   className="px-4 py-2 border-2 border-gray-300 rounded-xl hover:border-blue-500 transition-all flex items-center gap-2"
+                  aria-label="Share product"
                 >
                   <FaShare className="text-gray-400" />
                   <span className="text-sm">Share</span>
@@ -475,6 +508,7 @@ const ProductDetails = () => {
                 whileTap={{ scale: 0.98 }}
                 onClick={toggleReviewDialog}
                 className="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
+                aria-label="Submit review"
               >
                 {reviewLoading ? (
                   <CircularProgress size={24} color="inherit" />
@@ -551,11 +585,14 @@ const ProductDetails = () => {
             </div>
 
             <textarea
+              id="review-comment"
+              name="review-comment"
               placeholder="Write your review here..."
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               rows={4}
               className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-red-500 transition-colors resize-none"
+              aria-label="Review comment"
             />
           </div>
         </DialogContent>

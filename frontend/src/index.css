@@ -1,16 +1,102 @@
 /* src/index.css */
+
+/**
+ * 🎨 GLOBAL STYLES - Applied to the entire app
+ * 
+ * This file contains:
+ * 1. Tailwind CSS import
+ * 2. Global body styles
+ * 3. Font settings
+ * 
+ * 🌟 THINK OF IT LIKE:
+ *    - This is the "paint" for your entire app
+ *    - Everything here affects ALL pages
+ *    - It's like the default theme
+ * 
+ * 📦 PACKAGES USED:
+ *    - tailwindcss: Utility-first CSS framework
+ *    - We import it here so it's available everywhere
+ */
+
+/**
+ * 📥 Import Tailwind CSS
+ * 
+ * This imports all Tailwind utility classes
+ * After this, we can use classes like:
+ *    - bg-red-500 → background-color: #ef4444
+ *    - text-center → text-align: center
+ *    - flex → display: flex
+ *    - p-4 → padding: 1rem
+ * 
+ * ❓ What does @import do?
+ *    - It's a CSS directive
+ *    - It pulls in the Tailwind styles
+ *    - All Tailwind classes become available
+ * 
+ * 💡 Tailwind is a "utility-first" CSS framework
+ *    Instead of writing custom CSS for everything
+ *    You use pre-built utility classes
+ *    Faster development, consistent design
+ */
 @import "tailwindcss";
 
+/**
+ * 🖼️ Body Styles
+ * 
+ * These apply to the <body> element
+ * This is the base styling for the entire app
+ * 
+ * ❓ Why set margin: 0?
+ *    - Browsers have default margins (8px on body)
+ *    - We remove it so our app fills the screen
+ * 
+ * ❓ What is font-family?
+ *    - Sets the default font for the app
+ *    - Fallback fonts if primary font doesn't load
+ *    - "Segoe UI" (Windows), "Roboto" (Android), etc.
+ * 
+ * ❓ What is -webkit-font-smoothing?
+ *    - Makes fonts look smoother on Mac/WebKit browsers
+ *    - Better text rendering
+ * 
+ * ❓ What is -moz-osx-font-smoothing?
+ *    - Same thing but for Firefox on Mac
+ */
 body {
   margin: 0;
   font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
-    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    -apple-system,
+    /* Mac default font */ BlinkMacSystemFont,
+    /* Mac default font */ "Segoe UI",
+    /* Windows default font */ "Roboto",
+    /* Android default font */ "Oxygen",
+    /* Linux default font */ "Ubuntu",
+    /* Linux default font */ "Cantarell",
+    /* Linux default font */ "Fira Sans",
+    /* Firefox OS default font */ "Droid Sans",
+    /* Android default font */ "Helvetica Neue",
+    /* Mac default font */ sans-serif; /* Ultimate fallback */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+/**
+ * 💻 Code Styles
+ * 
+ * These apply to <code> elements
+ * Used for inline code snippets
+ * 
+ * ❓ What is monospace?
+ *    - All characters have the same width
+ *    - Better for code display
+ *    - Makes code more readable
+ */
 code {
   font-family:
-    source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+    source-code-pro,
+    /* Professional code font */ Menlo,
+    /* Mac code font */ Monaco,
+    /* Mac code font */ Consolas,
+    /* Windows code font */ "Courier New",
+    /* Windows code font */ monospace; /* Ultimate fallback */
 }

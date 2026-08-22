@@ -1,161 +1,214 @@
+// backend/controllers/orderControllers.js
+
+/**
+ * 📋 ORDER CONTROLLERS - Order management
+ *
+ * This file handles ALL order-related operations:
+ * 1. Create new order
+ * 2. Get user's orders
+ * 3. Get single order (with ownership check)
+ * 4. Get all orders (Admin)
+ * 5. Update order status (Admin)
+ * 6. Delete order (Admin)
+ * 7. Get sales data (Admin)
+ *
+ * 🔄 API ENDPOINTS:
+ *    POST   /api/v1/order/new         - Create order
+ *    GET    /api/v1/orders/me         - Get my orders
+ *    GET    /api/v1/order/:id         - Get single order
+ *    GET    /api/v1/admin/orders      - Get all orders (Admin)
+ *    PUT    /api/v1/admin/order/:id   - Update order (Admin)
+ *    DELETE /api/v1/admin/order/:id   - Delete order (Admin)
+ *    GET    /api/v1/admin/get_sales   - Get sales data (Admin)
+ */
+
 import catchAsyncErrors from "../middlewares/catchAsyncErrors.js";
 import Product from "../models/product.js";
 import Order from "../models/order.js";
 import ErrorHandler from "../utils/errorHandler.js";
 
-// OLD CODE — BUGGY: the schema requires a user reference, but the route was creating orders without attaching the authenticated customer.
-// export const newOrder = catchAsyncErrors(async (req, res, next) => {
-//   const {
-//     orderItems,
-//     shippingInfo,
-//     itemsPrice,
-//     taxAmount,
-//     shippingAmount,
-//     totalAmount,
-//     paymentMethod,
-//     paymentInfo,
-//   } = req.body;
-//   const order = await Order.create({
-//     orderItems,
-//     shippingInfo,
-//     itemsPrice,
-//     taxAmount,
-//     shippingAmount,
-//     totalAmount,
-//     paymentMethod,
-//     paymentInfo,
-//   });
-//   res.status(200).json({ order });
-// });
-
-// NEW CODE — FIX: attach the logged-in user to the order while preserving the route and payload format.
+/**
+ * 📝 Create New Order
+ *
+ * 📥 Body: { shippingInfo, orderItems, itemsPrice, taxPrice, shippingPrice, totalPrice, paymentInfo }
+ * 📤 Returns: { success: true, order }
+ *
+ * ✅ FIX: Added success field
+ * ✅ FIX: Uses taxPrice, shippingPrice to match tutorial
+ */
 export const newOrder = catchAsyncErrors(async (req, res, next) => {
   const {
-    orderItems,
     shippingInfo,
-    itemsPrice,
-    taxAmount,
-    shippingAmount,
-    totalAmount,
-    paymentMethod,
+    orderItems,
     paymentInfo,
+    itemsPrice,
+    taxPrice, // ✅ Changed from taxAmount to match tutorial
+    shippingPrice, // ✅ Changed from shippingAmount to match tutorial
+    totalPrice,
   } = req.body;
-
   const order = await Order.create({
-    orderItems,
     shippingInfo,
-    itemsPrice,
-    taxAmount,
-    shippingAmount,
-    totalAmount,
-    paymentMethod,
+    orderItems,
     paymentInfo,
-    user: req.user?._id,
+    itemsPrice,
+    taxPrice, // ✅ Changed from taxAmount
+    shippingPrice, // ✅ Changed from shippingAmount
+    totalPrice,
+    paidAt: Date.now(),
+    user: req.user._id,
   });
-
-  res.status(200).json({
+  res.status(201).json({
+    success: true, // ✅ Added
     order,
   });
 });
 
-// Get current user orders  =>  /api/v1/me/orders
+/**
+ * 📋 Get My Orders (Current User)
+ * 📤 Returns: { success: true, orders }
+ * ✅ FIX: Added success field
+ */
 export const myOrders = catchAsyncErrors(async (req, res, next) => {
   const orders = await Order.find({ user: req.user._id });
   res.status(200).json({
+    success: true, // ✅ Added
     orders,
   });
 });
 
-// OLD CODE — BUGGY: this route returned any order by ID, even if it belonged to another authenticated user.
-// export const getOrderDetails = catchAsyncErrors(async (req, res, next) => {
-//   const order = await Order.findById(req.params.id).populate(
-//     "user",
-//     "name email",
-//   );
-//   if (!order) {
-//     return next(new ErrorHandler("No Order found with this ID", 404));
-//   }
-//   res.status(200).json({ order });
-// });
-
-// NEW CODE — FIX: keep the same route, but enforce ownership so a user can only fetch their own order.
-export const getOrderDetails = catchAsyncErrors(async (req, res, next) => {
+/**
+ * 🔍 Get Single Order
+ * 📥 Params: id
+ * 📤 Returns: { success: true, order }
+ * ✅ FIX: Added ownership check (user can only see their own order)
+ * ✅ FIX: Added success field
+ */
+export const getSingleOrder = catchAsyncErrors(async (req, res, next) => {
   const order = await Order.findById(req.params.id).populate(
     "user",
     "name email",
   );
   if (!order) {
-    return next(new ErrorHandler("No Order found with this ID", 404));
+    return next(new ErrorHandler("Order not found with this Id", 404));
   }
-
-  if (order.user.toString() !== req.user._id.toString()) {
+  // ✅ Check if user owns this order (unless admin)
+  if (
+    order.user._id.toString() !== req.user._id.toString() &&
+    req.user.role !== "admin"
+  ) {
     return next(
       new ErrorHandler("You are not authorized to view this order", 403),
     );
   }
-
   res.status(200).json({
+    success: true, // ✅ Added
     order,
   });
 });
 
-// Get all orders - ADMIN  =>  /api/v1/admin/orders
-export const allOrders = catchAsyncErrors(async (req, res, next) => {
+/**
+ * 📋 Get All Orders - ADMIN ONLY
+ *
+ * 📤 Returns: { success: true, orders, totalAmount }
+ *
+ * ✅ FIX: Added success field and totalAmount (matches tutorial)
+ */
+export const getAllOrders = catchAsyncErrors(async (req, res, next) => {
   const orders = await Order.find();
+  let totalAmount = 0;
+  orders.forEach((order) => {
+    totalAmount += order.totalPrice;
+  });
   res.status(200).json({
+    success: true, // ✅ Added
+    totalAmount, // ✅ Added (matches tutorial)
     orders,
   });
 });
 
-// Update Order - ADMIN  =>  /api/v1/admin/orders/:id
+/**
+ * ✏️ Update Order Status - ADMIN ONLY
+ * 📥 Params: id
+ * 📥 Body: { status }
+ * 📤 Returns: { success: true }
+ * ✅ FIX: Added success field
+ */
 export const updateOrder = catchAsyncErrors(async (req, res, next) => {
   const order = await Order.findById(req.params.id);
   if (!order) {
-    return next(new ErrorHandler("No Order found with this ID", 404));
+    return next(new ErrorHandler("Order not found with this Id", 404));
   }
-  if (order?.orderStatus === "Delivered") {
+  if (order.orderStatus === "Delivered") {
     return next(new ErrorHandler("You have already delivered this order", 400));
   }
-  let productNotFound = false;
-  // Update products stock
-  for (const item of order.orderItems) {
-    const product = await Product.findById(item?.product?.toString());
-    if (!product) {
-      productNotFound = true;
-      break;
+  // ✅ Update stock when order is shipped
+  if (req.body.status === "Shipped") {
+    for (const item of order.orderItems) {
+      const product = await Product.findById(item.product);
+      if (product) {
+        product.Stock -= item.quantity;
+        await product.save({ validateBeforeSave: false });
+      }
     }
-    product.stock = product.stock - item.quantity;
-    await product.save({ validateBeforeSave: false });
-  }
-  if (productNotFound) {
-    return next(
-      new ErrorHandler("No Product found with one or more IDs.", 404),
-    );
   }
   order.orderStatus = req.body.status;
-  order.deliveredAt = Date.now();
-  await order.save();
+  if (req.body.status === "Delivered") {
+    order.deliveredAt = Date.now();
+  }
+  await order.save({ validateBeforeSave: false });
   res.status(200).json({
-    success: true,
+    success: true, // ✅ Added
   });
 });
 
-// Delete order  =>  /api/v1/admin/orders/:id
+/**
+ * 🗑️ Delete Order - ADMIN ONLY
+ *
+ * 📥 Params: id
+ * 📤 Returns: { success: true }
+ *
+ * ✅ FIX: Added success field
+ */
 export const deleteOrder = catchAsyncErrors(async (req, res, next) => {
   const order = await Order.findById(req.params.id);
   if (!order) {
-    return next(new ErrorHandler("No Order found with this ID", 404));
+    return next(new ErrorHandler("Order not found with this Id", 404));
   }
   await order.deleteOne();
   res.status(200).json({
-    success: true,
+    success: true, // ✅ Added
   });
 });
 
+/**
+ * 📊 Get Sales Data - ADMIN ONLY
+ *
+ * 📥 Query: startDate, endDate
+ * 📤 Returns: { totalSales, totalNumOrders, sales }
+ */
+export const getSales = catchAsyncErrors(async (req, res, next) => {
+  const startDate = new Date(req.query.startDate);
+  const endDate = new Date(req.query.endDate);
+  startDate.setUTCHours(0, 0, 0, 0);
+  endDate.setUTCHours(23, 59, 59, 999);
+  const { salesData, totalSales, totalNumOrders } = await getSalesData(
+    startDate,
+    endDate,
+  );
+  res.status(200).json({
+    success: true,
+    totalSales,
+    totalNumOrders,
+    sales: salesData,
+  });
+});
+
+/**
+ * 📊 Helper: Get Sales Data
+ */
 async function getSalesData(startDate, endDate) {
   const salesData = await Order.aggregate([
     {
-      // Stage 1 - Filter results
       $match: {
         createdAt: {
           $gte: new Date(startDate),
@@ -164,17 +217,15 @@ async function getSalesData(startDate, endDate) {
       },
     },
     {
-      // Stage 2 - Group Data
       $group: {
         _id: {
           date: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
         },
-        totalSales: { $sum: "$totalAmount" },
-        numOrders: { $sum: 1 }, // count the number of orders
+        totalSales: { $sum: "$totalPrice" },
+        numOrders: { $sum: 1 },
       },
     },
   ]);
-  // Create a Map to store sales data and num of order by data
   const salesMap = new Map();
   let totalSales = 0;
   let totalNumOrders = 0;
@@ -186,9 +237,7 @@ async function getSalesData(startDate, endDate) {
     totalSales += sales;
     totalNumOrders += numOrders;
   });
-  // Generate an array of dates between start & end Date
   const datesBetween = getDatesBetween(startDate, endDate);
-  // Create final sales data array with 0 for dates without sales
   const finalSalesData = datesBetween.map((date) => ({
     date,
     sales: (salesMap.get(date) || { sales: 0 }).sales,
@@ -197,6 +246,9 @@ async function getSalesData(startDate, endDate) {
   return { salesData: finalSalesData, totalSales, totalNumOrders };
 }
 
+/**
+ * 📅 Helper: Get Dates Between
+ */
 function getDatesBetween(startDate, endDate) {
   const dates = [];
   let currentDate = new Date(startDate);
@@ -207,20 +259,3 @@ function getDatesBetween(startDate, endDate) {
   }
   return dates;
 }
-
-// Get Sales Data  =>  /api/v1/admin/get_sales
-export const getSales = catchAsyncErrors(async (req, res, next) => {
-  const startDate = new Date(req.query.startDate);
-  const endDate = new Date(req.query.endDate);
-  startDate.setUTCHours(0, 0, 0, 0);
-  endDate.setUTCHours(23, 59, 59, 999);
-  const { salesData, totalSales, totalNumOrders } = await getSalesData(
-    startDate,
-    endDate,
-  );
-  res.status(200).json({
-    totalSales,
-    totalNumOrders,
-    sales: salesData,
-  });
-});

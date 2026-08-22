@@ -49,11 +49,10 @@ const About = () => {
   // Team members (you can replace with actual data)
   const teamMembers = [
     {
-      name: "Abhishek Singh",
-      role: "Founder & CEO",
-      avatar:
-        "https://res.cloudinary.com/tripleayt/image/upload/v1631555947/products/jpyibarlaxawvcvqjv5b.png",
-      bio: "Full-stack developer and content creator",
+      name: "Muhammad Imran",
+      role: "Developer",
+      avatar: "",
+      bio: "Full-stack developer",
     },
   ];
 
@@ -151,9 +150,7 @@ const About = () => {
               </h3>
               <p className="text-gray-700 leading-relaxed">
                 This is a sample e-commerce platform built with the MERN stack
-                (MongoDB, Express.js, React, Node.js). Created with the purpose
-                to teach full-stack development and provide a real-world project
-                for learning and practice.
+                (MongoDB, Express.js, React, Node.js).
               </p>
             </div>
 
