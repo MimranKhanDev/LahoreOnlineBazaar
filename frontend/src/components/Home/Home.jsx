@@ -29,7 +29,9 @@ const Home = () => {
   useEffect(() => {
     // Fetch products when component mounts
     dispatch(getProducts({}));
+  }, [dispatch]);
 
+  useEffect(() => {
     // Show error if any using react-hot-toast
     if (error) {
       toast.error(error, {

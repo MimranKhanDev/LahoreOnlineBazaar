@@ -22,16 +22,17 @@ export const getProducts = createAsyncThunk(
   async ({
     keyword = "",
     currentPage = 1,
-    price = [0, 25000],
+    price = [0, 300000],
     category = "",
     ratings = 0,
   }) => {
     // Build the query string
-    let link = `${API_URL}/products?keyword=${keyword}&page=${currentPage}&price[gte]=${price[0]}&price[lte]=${price[1]}&ratings[gte]=${ratings}`;
-
-    if (category) {
-      link += `&category=${category}`;
-    }
+    let link = `${API_URL}/products?page=${currentPage}`;
+    
+    if (keyword) link += `&keyword=${keyword}`;
+    if (price) link += `&price[gte]=${price[0]}&price[lte]=${price[1]}`;
+    if (category) link += `&category=${category}`;
+    if (ratings > 0) link += `&ratings[gte]=${ratings}`;
 
     const { data } = await axios.get(link);
     return data; // { products, productsCount, resultPerPage, filteredProductsCount }

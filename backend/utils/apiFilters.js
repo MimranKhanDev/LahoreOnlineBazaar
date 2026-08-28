@@ -21,14 +21,23 @@ class APIFilters {
   filters() {
     const queryCopy = { ...this.queryStr };
 
-    // Fields to remove
     const fieldsToRemove = ["keyword", "page", "limit"];
     fieldsToRemove.forEach((el) => delete queryCopy[el]);
 
-    // Advance filter for price, ratings etc
-    let queryStr = JSON.stringify(queryCopy);
-    queryStr = queryStr.replace(/\b(gt|gte|lt|lte)\b/g, (match) => `$${match}`);
+    const formattedQuery = {};
+    for (const key in queryCopy) {
+      if (key.includes("[") && key.endsWith("]")) {
+        const field = key.split("[")[0];
+        const op = key.split("[")[1].replace("]", "");
+        if (!formattedQuery[field]) formattedQuery[field] = {};
+        formattedQuery[field][op] = queryCopy[key]; // no $ here
+      } else {
+        formattedQuery[key] = queryCopy[key];
+      }
+    }
 
+    let queryStr = JSON.stringify(formattedQuery);
+    queryStr = queryStr.replace(/\b(gt|gte|lt|lte)\b/g, (match) => `$${match}`);
     this.query = this.query.find(JSON.parse(queryStr));
     return this;
   }

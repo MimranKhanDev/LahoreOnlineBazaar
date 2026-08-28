@@ -53,7 +53,7 @@ const Products = () => {
 
   // 🎯 State
   const [currentPage, setCurrentPage] = useState(1);
-  const [price, setPrice] = useState([0, 25000]);
+  const [price, setPrice] = useState([0, 300000]);
   const [category, setCategory] = useState("");
   const [ratings, setRatings] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
@@ -116,7 +116,7 @@ const Products = () => {
    * Resets price, category, and ratings to default
    */
   const clearFilters = () => {
-    setPrice([0, 25000]);
+    setPrice([0, 300000]);
     setCategory("");
     setRatings(0);
     setCurrentPage(1);
@@ -135,7 +135,6 @@ const Products = () => {
       getProducts({
         keyword: keyword || "",
         currentPage,
-        price,
         category,
         ratings,
       }),
@@ -172,7 +171,7 @@ const Products = () => {
                     </h3>
                     {/* Show Clear All button only if any filter is active */}
                     {(price[0] > 0 ||
-                      price[1] < 25000 ||
+                      price[1] < 300000 ||
                       category ||
                       ratings > 0) && (
                       <button
@@ -194,7 +193,7 @@ const Products = () => {
                       onChange={handlePriceChange}
                       valueLabelDisplay="auto"
                       min={0}
-                      max={25000}
+                      max={300000}
                       sx={{
                         color: "#ef4444",
                         "& .MuiSlider-thumb": {
@@ -280,7 +279,7 @@ const Products = () => {
                     <span className="font-semibold">Filters</span>
                     {/* Show Active badge if any filter is applied */}
                     {(price[0] > 0 ||
-                      price[1] < 25000 ||
+                      price[1] < 300000 ||
                       category ||
                       ratings > 0) && (
                       <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
@@ -305,7 +304,7 @@ const Products = () => {
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-bold">Filters</h3>
                       {(price[0] > 0 ||
-                        price[1] < 25000 ||
+                        price[1] < 300000 ||
                         category ||
                         ratings > 0) && (
                         <button
@@ -326,7 +325,7 @@ const Products = () => {
                         onChange={handlePriceChange}
                         valueLabelDisplay="auto"
                         min={0}
-                        max={25000}
+                        max={300000}
                         sx={{ color: "#ef4444" }}
                       />
                     </div>
