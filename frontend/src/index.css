@@ -40,6 +40,22 @@
  */
 @import "tailwindcss";
 
+.shiftToRight {
+  transform: translateX(100%);
+}
+
+.shiftToNeutral {
+  transform: translateX(0);
+}
+
+.shiftToLeft {
+  transform: translateX(-100vw);
+}
+
+.shiftToNeutralForm {
+  transform: translate(0, 0);
+}
+
 /**
  * 🖼️ Body Styles
  * 
@@ -64,15 +80,10 @@
  */
 body {
   margin: 0;
-  font-family:
-    -apple-system,
-    /* Mac default font */ BlinkMacSystemFont,
-    /* Mac default font */ "Segoe UI",
-    /* Windows default font */ "Roboto",
-    /* Android default font */ "Oxygen",
-    /* Linux default font */ "Ubuntu",
-    /* Linux default font */ "Cantarell",
-    /* Linux default font */ "Fira Sans",
+  font-family: -apple-system, /* Mac default font */ BlinkMacSystemFont,
+    /* Mac default font */ "Segoe UI", /* Windows default font */ "Roboto",
+    /* Android default font */ "Oxygen", /* Linux default font */ "Ubuntu",
+    /* Linux default font */ "Cantarell", /* Linux default font */ "Fira Sans",
     /* Firefox OS default font */ "Droid Sans",
     /* Android default font */ "Helvetica Neue",
     /* Mac default font */ sans-serif; /* Ultimate fallback */
@@ -92,11 +103,7 @@ body {
  *    - Makes code more readable
  */
 code {
-  font-family:
-    source-code-pro,
-    /* Professional code font */ Menlo,
-    /* Mac code font */ Monaco,
-    /* Mac code font */ Consolas,
-    /* Windows code font */ "Courier New",
-    /* Windows code font */ monospace; /* Ultimate fallback */
+  font-family: source-code-pro, /* Professional code font */ Menlo,
+    /* Mac code font */ Monaco, /* Mac code font */ Consolas,
+    /* Windows code font */ "Courier New", /* Windows code font */ monospace; /* Ultimate fallback */
 }

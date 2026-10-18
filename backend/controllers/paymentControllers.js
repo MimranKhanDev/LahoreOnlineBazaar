@@ -1,23 +1,3 @@
-// backend/controllers/paymentControllers.js
-
-/**
- * 💳 PAYMENT CONTROLLERS - Stripe payment integration
- *
- * This file handles:
- * 1. Stripe checkout session creation
- * 2. Stripe webhook handling
- *
- * 🔄 API ENDPOINTS:
- *    POST /api/v1/payment/checkout_session - Create checkout session
- *    POST /api/v1/payment/webhook          - Stripe webhook
- *
- * ⚠️ IMPORTANT: Your frontend expects the tutorial's approach
- *    The tutorial uses: /api/v1/payment/process → paymentIntents.create()
- *    We're adapting to use: /api/v1/payment/checkout_session → checkout.sessions.create()
- *
- * ✅ FIX: Added both approaches for compatibility
- */
-
 import catchAsyncErrors from "../middlewares/catchAsyncErrors.js";
 import Order from "../models/order.js";
 import Stripe from "stripe";
@@ -25,14 +5,6 @@ import Stripe from "stripe";
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 const stripe = stripeSecretKey ? new Stripe(stripeSecretKey) : null;
 
-/**
- * 💳 Create Stripe Checkout Session
- *
- * 📥 Body: { orderItems, shippingInfo, itemsPrice }
- * 📤 Returns: { url }
- *
- * ✅ FIX: Added fallback for tutorial's payment/process endpoint
- */
 export const stripeCheckoutSession = catchAsyncErrors(
   async (req, res, next) => {
     if (!stripe) {
@@ -42,10 +14,9 @@ export const stripeCheckoutSession = catchAsyncErrors(
       });
     }
     const { orderItems, shippingInfo, itemsPrice } = req.body;
-    // ✅ Build line items for checkout
     const line_items = orderItems.map((item) => ({
       price_data: {
-        currency: "dollar",
+        currency: "usd",
         product_data: {
           name: item.name,
           images: [item.image],
@@ -57,7 +28,6 @@ export const stripeCheckoutSession = catchAsyncErrors(
       },
       quantity: item.quantity,
     }));
-    // ✅ Determine shipping rate (free over $100)
     const shippingRate =
       itemsPrice >= 100
         ? "shr_1LlBW5A7jBHqn8SBG2fsAWwT"
@@ -83,11 +53,6 @@ export const stripeCheckoutSession = catchAsyncErrors(
   },
 );
 
-/**
- * 🔔 Stripe Webhook
- *
- * ✅ FIX: Added success field to response
- */
 export const stripeWebhook = catchAsyncErrors(async (req, res, next) => {
   try {
     if (!stripe) {
@@ -107,7 +72,6 @@ export const stripeWebhook = catchAsyncErrors(async (req, res, next) => {
       const line_items = await stripe.checkout.sessions.listLineItems(
         session.id,
       );
-      // ✅ Get order items from session
       const orderItems = await getOrderItems(line_items);
       const user = session.client_reference_id;
       const totalAmount = session.amount_total / 100;
@@ -125,7 +89,6 @@ export const stripeWebhook = catchAsyncErrors(async (req, res, next) => {
         id: session.payment_intent,
         status: session.payment_status,
       };
-      // ✅ Create order
       await Order.create({
         shippingInfo,
         orderItems,
@@ -139,7 +102,7 @@ export const stripeWebhook = catchAsyncErrors(async (req, res, next) => {
       });
     }
     res.status(200).json({
-      success: true, // ✅ Added
+      success: true,
     });
   } catch (error) {
     console.log("Stripe Webhook Error => ", error);
@@ -149,9 +112,6 @@ export const stripeWebhook = catchAsyncErrors(async (req, res, next) => {
   }
 });
 
-/**
- * 🛒 Helper: Get Order Items from Stripe
- */
 const getOrderItems = async (line_items) => {
   const cartItems = await Promise.all(
     line_items.data.map(async (item) => {
@@ -168,21 +128,6 @@ const getOrderItems = async (line_items) => {
   return cartItems;
 };
 
-/**
- * 💳 TUTORIAL COMPATIBILITY ENDPOINTS
- *
- * These endpoints match the tutorial's frontend expectations
- * They use the same paymentIntents.create() approach
- */
-
-/**
- * 💳 Process Payment (Tutorial compatible)
- *
- * 📥 Body: { amount }
- * 📤 Returns: { success: true, client_secret }
- *
- * ⚠️ This matches the tutorial's /api/v1/payment/process endpoint
- */
 export const processPayment = catchAsyncErrors(async (req, res, next) => {
   if (!stripe) {
     return res.status(500).json({
@@ -192,7 +137,7 @@ export const processPayment = catchAsyncErrors(async (req, res, next) => {
   }
   const myPayment = await stripe.paymentIntents.create({
     amount: req.body.amount,
-    currency: "inr",
+    currency: "usd",
     metadata: {
       company: "Ecommerce",
     },
@@ -203,13 +148,6 @@ export const processPayment = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
-/**
- * 🔑 Send Stripe API Key (Tutorial compatible)
- *
- * 📤 Returns: { stripeApiKey }
- *
- * ⚠️ This matches the tutorial's /api/v1/stripeapikey endpoint
- */
 export const sendStripeApiKey = catchAsyncErrors(async (req, res, next) => {
   res.status(200).json({
     stripeApiKey: process.env.STRIPE_API_KEY,
