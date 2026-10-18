@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 export const connectDatabase = async () => {
   const DB_URL =
-    process.env.NODE_ENV === "PRODUCTION"
+    process.env.NODE_ENV?.toLowerCase() === "production"
       ? process.env.MONGO_URI
       : process.env.LOCALDB_URL;
   if (!DB_URL) {

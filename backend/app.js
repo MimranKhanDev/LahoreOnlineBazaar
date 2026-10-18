@@ -1,8 +1,7 @@
 import express from "express";
 const app = express();
 app.set("query parser", "extended");
-import "dotenv/config";
-// import dotenv from "dotenv";
+import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 
 import { connectDatabase } from "./config/dbConnect.js";
@@ -12,16 +11,14 @@ import path from "path";
 import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const envFilePath = path.resolve(__dirname, "config/config.env");
+dotenv.config({ path: envFilePath });
 
-// 🔥 Handle Uncaught exceptions
 process.on("uncaughtException", (err) => {
   console.log(`ERROR: ${err}`);
   console.log("Shutting down due to uncaught exception");
   process.exit(1);
 });
-
-// const envFilePath = path.resolve(__dirname, "config/config.env");
-// dotenv.config({ path: envFilePath });
 
 connectDatabase();
 
@@ -48,7 +45,7 @@ app.use("/api/v1", orderRoutes);
 app.use("/api/v1", paymentRoutes);
 
 // // 🌐 Production static file serving (commented - uncomment when deploying)
-// if (process.env.NODE_ENV === "PRODUCTION") {
+// if (process.env.NODE_ENV?.toLowerCase() === "production") {
 //   app.use(express.static(path.join(__dirname, "../frontend/dist")));
 //   app.get(/.*/, (req, res) => {
 //     res.sendFile(path.resolve(__dirname, "../frontend/dist/index.html"));
