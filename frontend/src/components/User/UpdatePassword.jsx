@@ -1,21 +1,4 @@
-// src/components/User/UpdatePassword.jsx
-
-/**
- * 🔐 UPDATE PASSWORD - Change user password
- *
- * Features:
- * 1. Old password input
- * 2. New password input
- * 3. Confirm password input
- * 4. Password visibility toggle
- *
- * 📦 Packages Used:
- * - @mui/icons-material: v5+
- * - react-hot-toast: v2+
- * - framer-motion: v9+
- */
-
-import React, { Fragment, useState, useEffect } from "react";
+import { Fragment, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -28,8 +11,6 @@ import {
   VisibilityOff,
 } from "@mui/icons-material";
 import { CircularProgress } from "@mui/material";
-
-// ✅ Redux Toolkit imports
 import {
   updatePassword,
   clearErrors,
@@ -37,14 +18,12 @@ import {
   selectUserLoading,
   selectUserError,
 } from "../../features/user/userSlice";
-
 import Loader from "../layout/Loader/Loader";
 import MetaData from "../layout/MetaData";
 
 const UpdatePassword = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
   // 📊 Redux state
   const loading = useSelector(selectUserLoading);
   const error = useSelector(selectUserError);
@@ -57,32 +36,24 @@ const UpdatePassword = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  /**
-   * 🔄 Handle form submission
-   */
   const updatePasswordSubmit = (e) => {
     e.preventDefault();
-
     if (newPassword !== confirmPassword) {
       toast.error("New passwords do not match");
       return;
     }
-
-    if (newPassword.length < 6) {
-      toast.error("Password must be at least 6 characters");
+    if (newPassword.length < 8) {
+      toast.error("Password must be at least 8 characters");
       return;
     }
-
     dispatch(updatePassword({ oldPassword, newPassword, confirmPassword }));
   };
 
-  // 🔄 Effects
   useEffect(() => {
     if (error) {
       toast.error(error);
       dispatch(clearErrors());
     }
-
     if (isUpdated) {
       toast.success("Password updated successfully! 🎉");
       dispatch(clearMessages());
@@ -93,7 +64,6 @@ const UpdatePassword = () => {
   return (
     <Fragment>
       <MetaData title="Change Password | ECOMMERCE" />
-
       {loading ? (
         <Loader />
       ) : (

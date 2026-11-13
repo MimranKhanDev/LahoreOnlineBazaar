@@ -32,9 +32,12 @@ const CartItemCard = ({
       <div className="col-span-12 md:col-span-6 flex items-center gap-4">
         <motion.img
           whileHover={{ scale: 1.05 }}
-          src={item.image}
+          src={item.image || "/placeholder.jpg"}
           alt={item.name}
           className="w-20 h-20 md:w-24 md:h-24 object-cover rounded-xl shadow-md"
+          onError={(e) => {
+            e.target.src = "/placeholder.jpg";
+          }}
         />
         <div className="flex-1 min-w-0">
           <Link
@@ -43,7 +46,7 @@ const CartItemCard = ({
           >
             {item.name}
           </Link>
-          <p className="text-sm text-gray-500 mt-1">₹{item.price} each</p>
+          <p className="text-sm text-gray-500 mt-1">${item.price} each</p>
         </div>
       </div>
 
@@ -74,7 +77,7 @@ const CartItemCard = ({
 
       {/* 💰 Subtotal - Right */}
       <div className="col-span-3 md:col-span-2 text-right font-semibold text-gray-800">
-        ₹{(item.price * item.quantity).toFixed(2)}
+        ${(item.price * item.quantity).toFixed(2)}
       </div>
 
       {/* 🗑️ Remove Button */}

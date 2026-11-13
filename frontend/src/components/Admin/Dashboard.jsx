@@ -1,24 +1,4 @@
-// src/components/Admin/Dashboard.jsx
-
-/**
- * 📊 DASHBOARD - Admin dashboard with analytics
- *
- * Features:
- * 1. Summary cards (Total Amount, Products, Orders, Users)
- * 2. Revenue chart (Line chart)
- * 3. Stock status chart (Doughnut chart)
- *
- * 📦 Packages Used:
- * - recharts: v2+ (modern charts)
- * - framer-motion: v9+ (animations)
- *
- * 🔄 Redux Toolkit:
- * - productSlice: getAdminProducts
- * - orderSlice: getAllOrders
- * - userSlice: getAllUsers
- */
-
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   LineChart,
@@ -52,6 +32,8 @@ import {
 import {
   getAllOrders,
   selectAllOrders,
+  getSales,
+  selectSales,
 } from "../../features/orders/orderSlice";
 import { getAllUsers, selectAllUsers } from "../../features/user/userSlice";
 
@@ -68,21 +50,25 @@ const Dashboard = () => {
   const users = useSelector(selectAllUsers) || [];
   const loading = useSelector(selectAdminLoading);
 
+  const salesData = useSelector(selectSales) || [];
+
   // 📊 Calculate stats
   const outOfStock = products.filter((item) => item.Stock === 0).length;
   const totalAmount = orders.reduce((acc, item) => acc + item.totalPrice, 0);
 
   /**
-   * 📈 Revenue chart data
+   * 📈 Revenue chart data (Real Data from Backend)
    */
-  const revenueData = [
-    { name: "Jan", revenue: Math.round(totalAmount * 0.1) },
-    { name: "Feb", revenue: Math.round(totalAmount * 0.15) },
-    { name: "Mar", revenue: Math.round(totalAmount * 0.2) },
-    { name: "Apr", revenue: Math.round(totalAmount * 0.12) },
-    { name: "May", revenue: Math.round(totalAmount * 0.18) },
-    { name: "Jun", revenue: Math.round(totalAmount * 0.25) },
-  ];
+  const revenueData =
+    salesData.length > 0
+      ? salesData.map((item) => ({
+          name: new Date(item.date).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+          }),
+          revenue: item.sales,
+        }))
+      : [{ name: "No Sales Yet", revenue: 0 }];
 
   /**
    * 🍩 Stock pie chart data
@@ -100,7 +86,7 @@ const Dashboard = () => {
   const summaryCards = [
     {
       title: "Total Revenue",
-      value: `₹${totalAmount.toLocaleString()}`,
+      value: `$${totalAmount.toLocaleString()}`,
       icon: FaDollarSign,
       color: "from-green-500 to-green-600",
     },
@@ -128,6 +114,7 @@ const Dashboard = () => {
     dispatch(getAdminProducts());
     dispatch(getAllOrders());
     dispatch(getAllUsers());
+    dispatch(getSales());
   }, [dispatch]);
 
   if (loading) return <Loader />;
@@ -195,7 +182,7 @@ const Dashboard = () => {
                     <XAxis dataKey="name" />
                     <YAxis />
                     <Tooltip
-                      formatter={(value) => [`₹${value}`, "Revenue"]}
+                      formatter={(value) => [`$${value}`, "Revenue"]}
                       contentStyle={{
                         backgroundColor: "white",
                         borderRadius: "8px",

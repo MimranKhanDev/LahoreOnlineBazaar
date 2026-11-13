@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
@@ -8,7 +8,6 @@ import {
   FaSearch,
   FaBars,
   FaTimes,
-  FaStore,
 } from "react-icons/fa";
 import logo from "../../../images/logo.jpg";
 
@@ -16,6 +15,7 @@ import { selectCartItems } from "../../../features/cart/cartSlice";
 import {
   selectIsAuthenticated,
   selectUser,
+  logoutUser,
 } from "../../../features/user/userSlice";
 
 const Header = () => {
@@ -49,7 +49,6 @@ const Header = () => {
     }
   };
 
-  // Navigation links
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "Products", path: "/products" },
@@ -77,7 +76,7 @@ const Header = () => {
               <img src={logo} alt="Logo" className="h-10 w-auto md:h-12" />
             </motion.div>
             <span className="text-xl md:text-2xl font-bold text-red-500 group-hover:text-red-600 transition-colors">
-              ECOMMERCE
+              LAHORE ONLINE BAZAAR
             </span>
           </Link>
 
@@ -127,6 +126,7 @@ const Header = () => {
             <Link
               to={isAuthenticated ? "/account" : "/login"}
               className="flex items-center gap-2 group"
+              title={isAuthenticated ? "My Account" : "Login"}
             >
               {isAuthenticated && user ? (
                 <motion.div whileHover={{ scale: 1.05 }} className="relative">
@@ -146,6 +146,18 @@ const Header = () => {
                 </motion.div>
               )}
             </Link>
+            {/* ✅ NEW: Logout Button */}
+            {isAuthenticated && (
+              <button
+                onClick={() => {
+                  dispatch(logoutUser());
+                  navigate("/login");
+                }}
+                className="hidden md:block text-sm font-semibold text-gray-500 hover:text-red-500 transition-colors ml-2"
+              >
+                Logout
+              </button>
+            )}
 
             {/* Mobile Menu Toggle */}
             <button
@@ -250,6 +262,20 @@ const Header = () => {
                     >
                       Dashboard
                     </Link>
+                  )}
+
+                  {/* ✅ NEW: Mobile Logout Button */}
+                  {isAuthenticated && (
+                    <button
+                      onClick={() => {
+                        dispatch(logoutUser());
+                        setIsMenuOpen(false);
+                        navigate("/login");
+                      }}
+                      className="px-4 py-3 text-left text-red-500 font-semibold hover:bg-red-50 rounded-lg transition-all"
+                    >
+                      Logout
+                    </button>
                   )}
                 </div>
               </div>

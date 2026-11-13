@@ -1,26 +1,7 @@
-// src/components/Product/Products.jsx
-
-/**
- * 📋 PRODUCTS - Displays product listing with filters
- * Features:
- * 1. Product grid with cards
- * 2. Price filter (slider) - Using @mui/material/Slider
- * 3. Category filter - Using @mui/material/Chip
- * 4. Rating filter - Using @mui/material/Slider
- * 5. Pagination - Using react-js-pagination
- * 6. Search functionality
- *
- * 📦 Packages Used:
- * - @mui/material: v5+ (Slider, Chip, Typography)
- * - react-js-pagination: v3+
- * - framer-motion: v9+ (animations)
- */
-
-import React, { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
-import Pagination from "react-js-pagination";
 import { Slider, Typography, Chip } from "@mui/material";
 import {
   FaFilter,
@@ -29,8 +10,6 @@ import {
   FaChevronRight,
 } from "react-icons/fa";
 import toast from "react-hot-toast";
-
-// ✅ Redux Toolkit imports
 import {
   getProducts,
   clearErrors,
@@ -41,7 +20,6 @@ import {
   selectResultPerPage,
   selectFilteredProductsCount,
 } from "../../features/products/productSlice";
-
 import Loader from "../layout/Loader/Loader";
 import ProductCard from "../Home/ProductCard";
 import MetaData from "../layout/MetaData";
@@ -50,9 +28,8 @@ const Products = () => {
   const { keyword } = useParams();
   const dispatch = useDispatch();
 
-  // 🎯 State
   const [currentPage, setCurrentPage] = useState(1);
-  const [price, setPrice] = useState([0, 1000000]);
+  const [price, setPrice] = useState([0, 200000]);
   const [category, setCategory] = useState("");
   const [ratings, setRatings] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
@@ -65,7 +42,6 @@ const Products = () => {
   const resultPerPage = useSelector(selectResultPerPage);
   const filteredProductsCount = useSelector(selectFilteredProductsCount);
 
-  // 📂 Categories
   const categories = [
     "Laptop",
     "Footwear",
@@ -77,54 +53,39 @@ const Products = () => {
     "Accessories",
   ];
 
-  /**
-   * 📄 Handle page change
-   */
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
-  /**
-   * 💰 Handle price range change from slider
-   */
   const handlePriceChange = (event, newPrice) => {
     setPrice(newPrice);
   };
-
-  /**
-   * 🏷️ Handle category click - Toggle category selection
-   */
   const handleCategoryClick = (categoryName) => {
     setCategory(categoryName === category ? "" : categoryName);
     setCurrentPage(1);
   };
-
-  /**
-   * ⭐ Handle ratings change from slider
-   */
   const handleRatingsChange = (event, newRating) => {
     setRatings(newRating);
     setCurrentPage(1);
   };
-
-  /**
-   * 🔄 Clear all filters
-   */
   const clearFilters = () => {
-    setPrice([0, 25000]);
+    setPrice([0, 200000]);
     setCategory("");
     setRatings(0);
     setCurrentPage(1);
   };
 
-  // 🔄 Fetch products when filters change
+  // Handle Errors this is for error and the  below is for refetching them
   useEffect(() => {
     if (error) {
       toast.error(error);
       dispatch(clearErrors());
     }
+  }, [dispatch, error]);
 
+  // 🔄 Fetch products when filters change
+  // we changed code here
+  useEffect(() => {
     dispatch(
       getProducts({
         keyword: keyword || "",
@@ -134,7 +95,7 @@ const Products = () => {
         ratings,
       }),
     );
-  }, [dispatch, keyword, currentPage, price, category, ratings, error]);
+  }, [dispatch, keyword, currentPage, price, category, ratings]);
 
   return (
     <Fragment>
@@ -187,7 +148,7 @@ const Products = () => {
                       onChange={handlePriceChange}
                       valueLabelDisplay="auto"
                       min={0}
-                      max={25000}
+                      max={200000}
                       sx={{
                         color: "#ef4444",
                         "& .MuiSlider-thumb": {
@@ -316,7 +277,7 @@ const Products = () => {
                         onChange={handlePriceChange}
                         valueLabelDisplay="auto"
                         min={0}
-                        max={25000}
+                        max={200000}
                         sx={{ color: "#ef4444" }}
                       />
                     </div>
@@ -379,12 +340,13 @@ const Products = () => {
                     </div>
 
                     {/* Pagination - Only show if more than 1 page */}
-                    {resultPerPage < filteredProductsCount && (
+                    {/* {resultPerPage < filteredProductsCount && (
                       <div className="flex justify-center mt-12">
                         <Pagination
                           activePage={currentPage}
                           itemsCountPerPage={resultPerPage}
-                          totalItemsCount={productsCount}
+                          // totalItemsCount={productsCount} // fix is that it will show all results in db
+                          totalItemsCount={filteredProductsCount}
                           onChange={handlePageChange}
                           nextPageText={<FaChevronRight />}
                           prevPageText={<FaChevronLeft />}
@@ -398,6 +360,54 @@ const Products = () => {
                           itemClassFirst="rounded-l-lg"
                           itemClassLast="rounded-r-lg"
                         />
+                      </div>
+                    )} */}
+
+                    {/* Pagination - Only show if more than 1 page */}
+                    {resultPerPage < filteredProductsCount && (
+                      <div className="flex justify-center items-center mt-12 gap-2">
+                        {/* Previous Button */}
+                        <button
+                          onClick={() => handlePageChange(currentPage - 1)}
+                          disabled={currentPage === 1}
+                          className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                          <FaChevronLeft />
+                        </button>
+
+                        {/* Page Numbers */}
+                        {Array.from(
+                          {
+                            length: Math.ceil(
+                              filteredProductsCount / resultPerPage,
+                            ),
+                          },
+                          (_, i) => i + 1,
+                        ).map((page) => (
+                          <button
+                            key={page}
+                            onClick={() => handlePageChange(page)}
+                            className={`w-10 h-10 flex items-center justify-center rounded-lg border font-medium transition-colors ${
+                              currentPage === page
+                                ? "bg-red-500 border-red-500 text-white shadow-md"
+                                : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        ))}
+
+                        {/* Next Button */}
+                        <button
+                          onClick={() => handlePageChange(currentPage + 1)}
+                          disabled={
+                            currentPage ===
+                            Math.ceil(filteredProductsCount / resultPerPage)
+                          }
+                          className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                          <FaChevronRight />
+                        </button>
                       </div>
                     )}
                   </>

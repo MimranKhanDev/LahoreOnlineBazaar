@@ -1,4 +1,3 @@
-import React from "react";
 import { Link } from "react-router-dom";
 // import { Rating } from "@mui/lab";
 import Rating from "@mui/material/Rating";
@@ -81,11 +80,11 @@ const ProductCard = ({ product }) => {
         {/* Price */}
         <div className="flex items-center mt-3">
           <span className="text-2xl font-bold text-red-500">
-            ₹{product.price}
+            ${product.price}
           </span>
           {product.originalPrice && (
             <span className="text-sm text-gray-400 line-through ml-2">
-              ₹{product.originalPrice}
+              ${product.originalPrice}
             </span>
           )}
         </div>

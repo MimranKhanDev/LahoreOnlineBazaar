@@ -13,7 +13,6 @@
  * - react-icons: v4+ (icons)
  */
 
-import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaCheckCircle, FaShoppingBag, FaHome } from "react-icons/fa";

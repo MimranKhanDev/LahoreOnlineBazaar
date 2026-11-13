@@ -1,22 +1,6 @@
-// src/components/Product/ReviewCard.jsx
-
-/**
- * ⭐ REVIEW CARD - Displays individual review
- *
- * This component shows:
- * 1. User avatar and name
- * 2. Review rating (using @mui/material/Rating)
- * 3. Review comment
- * 4. Review date
- * 5. Helpful/Report buttons (UI only)
- *
- * 📦 Package Used:
- * - @mui/material/Rating: v5+
- */
-
 import React from "react";
 import { motion } from "framer-motion";
-import Rating from "@mui/material/Rating"; // ✅ MUI v5
+import Rating from "@mui/material/Rating";
 import { FaCalendarAlt, FaCheckCircle } from "react-icons/fa";
 import profilePng from "../../images/profile.jpg";
 
@@ -24,16 +8,10 @@ const ReviewCard = ({ review }) => {
   // ⭐ Rating options for MUI Rating component
   const ratingOptions = {
     value: review.rating || 0,
-    readOnly: true, // User cannot change rating
+    readOnly: true,
     precision: 0.5, // Allow half stars
     size: "small",
   };
-
-  /**
-   * 📅 Format date for display
-   * Converts ISO date string to "Month Day, Year" format
-   * Example: "2024-01-15T10:30:00" → "January 15, 2024"
-   */
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
@@ -54,8 +32,8 @@ const ReviewCard = ({ review }) => {
       <div className="flex items-center gap-3 mb-3">
         {/* User Avatar - falls back to default if missing */}
         <img
-          src={review.avatar || profilePng}
-          alt={review.name}
+          src={review.user?.avatar?.url || profilePng} // Acess nested user object
+          alt={review.user?.name || "User"}
           className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
           onError={(e) => {
             e.target.src = profilePng; // Fallback if image fails to load
@@ -63,7 +41,7 @@ const ReviewCard = ({ review }) => {
         />
         <div>
           <p className="font-semibold text-gray-800 flex items-center gap-1">
-            {review.name}
+            {review.user?.name || review.name || "Anonymous User"}
             {/* Show verification badge if user is verified */}
             {review.isVerified && (
               <FaCheckCircle className="text-blue-500 text-sm" />

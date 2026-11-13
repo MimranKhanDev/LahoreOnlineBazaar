@@ -1,25 +1,10 @@
-// src/components/Admin/UsersList.jsx
-
-/**
- * 👥 USERS LIST - Admin user management
- *
- * Features:
- * 1. Data grid with all users
- * 2. Edit user link
- * 3. Delete user action
- * 4. Role indicators
- *
- * 🔄 Redux Toolkit:
- * - userSlice: getAllUsers, deleteUser, clearErrors
- */
-
-import React, { Fragment, useEffect } from "react";
+import { Fragment, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { DataGrid } from "@mui/x-data-grid";
-import { Chip, IconButton } from "@mui/material";
+import { Chip } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";
 import { FaUserShield, FaUser, FaUsers } from "react-icons/fa";
 
@@ -28,6 +13,7 @@ import {
   getAllUsers,
   deleteUser,
   clearErrors,
+  clearMessages,
   selectAllUsers,
   selectUserLoading,
   selectUserError,
@@ -124,13 +110,13 @@ const UsersList = () => {
       renderCell: (params) => (
         <div className="flex items-center gap-2">
           <Link
-            to={`/admin/user/${params.getValue(params.id, "id")}`}
+            to={`/admin/user/${params.row.id}`}
             className="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-all"
           >
             <Edit fontSize="small" />
           </Link>
           <button
-            onClick={() => deleteUserHandler(params.getValue(params.id, "id"))}
+            onClick={() => deleteUserHandler(params.row.id)}
             className="p-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-all"
           >
             <Delete fontSize="small" />
@@ -152,7 +138,12 @@ const UsersList = () => {
       createdAt: item.createdAt || new Date(),
     })) || [];
 
-  // 🔄 Effects
+  // 🔄 Fetch users on mount
+  useEffect(() => {
+    dispatch(getAllUsers());
+  }, [dispatch]);
+
+  // 🔄 Handle Errors and Deletion Success
   useEffect(() => {
     if (error) {
       toast.error(error);
@@ -161,12 +152,10 @@ const UsersList = () => {
 
     if (isDeleted) {
       toast.success("User deleted successfully! 🎉");
-      dispatch(getAllUsers());
+      dispatch(clearMessages()); // ✅ Reset the flag
+      dispatch(getAllUsers()); // Refresh table
     }
-
-    dispatch(getAllUsers());
   }, [dispatch, error, isDeleted]);
-
   if (loading) return <Loader />;
 
   return (

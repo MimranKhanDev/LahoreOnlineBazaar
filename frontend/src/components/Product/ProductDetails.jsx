@@ -1,20 +1,4 @@
-// src/components/Product/ProductDetails.jsx
-
-/**
- * 🛒 PRODUCT DETAILS - Displays single product with reviews
- *
- * This component shows:
- * 1. Product images (carousel)
- * 2. Product details (name, price, description)
- * 3. Quantity selector
- * 4. Add to cart functionality
- * 5. Review submission
- * 6. User reviews list
- *
- * 📦 Package Used: react-material-ui-carousel (v3+) - Works with MUI v5
- */
-
-import React, { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
@@ -40,8 +24,6 @@ import {
   FaShare,
   FaHeart,
 } from "react-icons/fa";
-
-// ✅ Redux Toolkit imports
 import {
   getProductDetails,
   clearErrors,
@@ -55,26 +37,24 @@ import {
 // ✅ Cart actions
 import { addToCart } from "../../features/cart/cartSlice";
 
+// ✅ User Auth state
+import { selectIsAuthenticated } from "../../features/user/userSlice";
+
 import Loader from "../layout/Loader/Loader";
 import MetaData from "../layout/MetaData";
 import ReviewCard from "./ReviewCard";
 
 const ProductDetails = () => {
-  // 🎯 React Router v6 - useParams instead of match
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const isAuthenticated = useSelector(selectIsAuthenticated);
 
-  // OLD CODE — BUGGY: selectProductDetails returns the product object itself, not an object containing product/loading/error.
-  // const productState = useSelector(selectProductDetails) || {};
-  // const { product = null, loading = false, error = null } = productState;
-
-  // NEW CODE — FIX: read the product and its loading/error state from their actual Redux selectors.
   const product = useSelector(selectProductDetails);
   const loading = useSelector(selectProductDetailsLoading);
   const error = useSelector(selectProductDetailsError);
 
-  // ✅ FIXED: Safe destructuring for review state
+  // ✅ Safe destructuring for review state
   const reviewState = useSelector((state) => state.products) || {};
   const {
     reviewSuccess = false,
@@ -98,9 +78,6 @@ const ProductDetails = () => {
     precision: 0.5,
   };
 
-  /**
-   * ➕ Increase quantity (max: product stock)
-   */
   const increaseQuantity = () => {
     if (product?.Stock <= quantity) {
       toast.error("Maximum stock limit reached");
@@ -109,17 +86,11 @@ const ProductDetails = () => {
     setQuantity(quantity + 1);
   };
 
-  /**
-   * ➖ Decrease quantity (min: 1)
-   */
   const decreaseQuantity = () => {
     if (1 >= quantity) return;
     setQuantity(quantity - 1);
   };
 
-  /**
-   * 🛒 Add product to cart
-   */
   const addToCartHandler = () => {
     if (!product || !product._id) {
       toast.error("Product not available");
@@ -142,10 +113,12 @@ const ProductDetails = () => {
     });
   };
 
-  /**
-   * 📝 Toggle review dialog
-   */
   const toggleReviewDialog = () => {
+    if (!isAuthenticated) {
+      toast.error("Please login to submit a review");
+      navigate("/login");
+      return;
+    }
     setOpenReviewDialog(!openReviewDialog);
     if (!openReviewDialog) {
       setRating(0);
@@ -153,9 +126,6 @@ const ProductDetails = () => {
     }
   };
 
-  /**
-   * ⭐ Submit review
-   */
   const reviewSubmitHandler = () => {
     if (rating === 0) {
       toast.error("Please select a rating");
@@ -171,20 +141,13 @@ const ProductDetails = () => {
     dispatch(createReview(reviewData));
   };
 
-  /**
-   * ❤️ Toggle wishlist (UI only - backend not implemented)
-   */
   const toggleWishlist = () => {
     setIsWishlisted(!isWishlisted);
     toast.success(isWishlisted ? "Removed from wishlist" : "Added to wishlist");
   };
 
-  /**
-   * 📤 Share product (uses Web Share API or clipboard fallback)
-   */
   const shareProduct = () => {
     if (!product) return;
-
     if (navigator.share) {
       navigator.share({
         title: product.name,
@@ -197,7 +160,14 @@ const ProductDetails = () => {
     }
   };
 
-  // 🔄 Effects - Runs when component mounts or dependencies change
+  // Fetch product on mount
+  useEffect(() => {
+    if (id) {
+      dispatch(getProductDetails(id));
+    }
+  }, [dispatch, id]);
+
+  // Handle Errors and Review Success
   useEffect(() => {
     if (error) {
       toast.error(error);
@@ -211,22 +181,14 @@ const ProductDetails = () => {
 
     if (reviewSuccess) {
       toast.success("Review submitted successfully! 🎉");
-      dispatch(resetReviewState());
       setOpenReviewDialog(false);
-      dispatch(getProductDetails(id));
-    }
-
-    if (id) {
+      dispatch(resetReviewState());
       dispatch(getProductDetails(id));
     }
   }, [dispatch, id, error, reviewError, reviewSuccess]);
 
-  // ⏳ Loading state
-  if (loading) {
-    return <Loader />;
-  }
+  if (loading) return <Loader />;
 
-  // 🚫 Product not found
   if (!product || !product._id) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -252,7 +214,6 @@ const ProductDetails = () => {
     <Fragment>
       <MetaData title={`${product.name} | ECOMMERCE`} />
 
-      {/* 🎯 Main Product Container */}
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4">
         <div className="container mx-auto max-w-7xl">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
@@ -263,9 +224,8 @@ const ProductDetails = () => {
               transition={{ duration: 0.6 }}
               className="space-y-4"
             >
-              {/* Main Image Carousel */}
               <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
-                <Carousel
+                {/*                 <Carousel
                   animation="slide"
                   indicators={true}
                   timeout={500}
@@ -279,20 +239,10 @@ const ProductDetails = () => {
                       margin: "0 10px",
                     },
                   }}
-                  indicatorContainerProps={{
-                    style: {
-                      marginTop: "10px",
-                    },
-                  }}
-                  indicatorIconButtonProps={{
-                    style: {
-                      color: "#d1d5db",
-                    },
-                  }}
+                  indicatorContainerProps={{ style: { marginTop: "10px" } }}
+                  indicatorIconButtonProps={{ style: { color: "#d1d5db" } }}
                   activeIndicatorIconButtonProps={{
-                    style: {
-                      color: "#ef4444",
-                    },
+                    style: { color: "#ef4444" },
                   }}
                 >
                   {product.images?.map((item, i) => (
@@ -308,10 +258,19 @@ const ProductDetails = () => {
                       }}
                     />
                   ))}
-                </Carousel>
+                </Carousel>*/}
+                <div className="w-full h-[400px] md:h-[500px] flex items-center justify-center p-4">
+                  <img
+                    src={product.images?.[0]?.url || "/placeholder.jpg"}
+                    alt={product.name}
+                    className="w-full h-full object-contain"
+                    onError={(e) => {
+                      e.target.src = "/placeholder.jpg";
+                    }}
+                  />
+                </div>
               </div>
 
-              {/* Thumbnail Gallery - Shows below carousel */}
               {product.images?.length > 1 && (
                 <div className="flex gap-3 overflow-x-auto pb-2">
                   {product.images.map((item, i) => (
@@ -347,7 +306,6 @@ const ProductDetails = () => {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="space-y-6"
             >
-              {/* Product Name & ID */}
               <div>
                 <h1 className="text-3xl md:text-4xl font-bold text-gray-800 leading-tight">
                   {product.name}
@@ -357,7 +315,6 @@ const ProductDetails = () => {
                 </p>
               </div>
 
-              {/* Rating & Reviews */}
               <div className="flex items-center gap-4 flex-wrap">
                 <div className="flex items-center gap-2">
                   <Rating {...ratingOptions} />
@@ -384,14 +341,13 @@ const ProductDetails = () => {
                 )}
               </div>
 
-              {/* Price */}
               <div className="flex items-end gap-3">
                 <h2 className="text-4xl font-bold text-red-500">
-                  ₹{product.price}
+                  ${product.price}
                 </h2>
                 {product.originalPrice && (
                   <span className="text-xl text-gray-400 line-through">
-                    ₹{product.originalPrice}
+                    ${product.originalPrice}
                   </span>
                 )}
                 {product.originalPrice && (
@@ -406,7 +362,6 @@ const ProductDetails = () => {
                 )}
               </div>
 
-              {/* Quantity Selector & Add to Cart */}
               <div className="flex flex-wrap items-center gap-4 p-4 bg-gray-50 rounded-2xl">
                 <div className="flex items-center border-2 border-gray-200 rounded-xl overflow-hidden">
                   <button
@@ -449,7 +404,6 @@ const ProductDetails = () => {
                 </motion.button>
               </div>
 
-              {/* Action Buttons */}
               <div className="flex gap-3">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -478,7 +432,6 @@ const ProductDetails = () => {
                 </motion.button>
               </div>
 
-              {/* Description */}
               <div className="pt-4 border-t border-gray-200">
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">
                   Description
@@ -488,7 +441,6 @@ const ProductDetails = () => {
                 </p>
               </div>
 
-              {/* Additional Info */}
               <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-2xl">
                 <div>
                   <p className="text-sm text-gray-500">Category</p>
@@ -502,7 +454,6 @@ const ProductDetails = () => {
                 </div>
               </div>
 
-              {/* Submit Review Button */}
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}

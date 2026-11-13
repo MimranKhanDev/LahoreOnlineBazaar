@@ -1,29 +1,10 @@
-// src/components/User/UpdateProfile.jsx
-
-/**
- * ✏️ UPDATE PROFILE - Edit user profile
- *
- * Features:
- * 1. Name input
- * 2. Email input
- * 3. Avatar upload with preview
- * 4. Form validation
- *
- * 📦 Packages Used:
- * - @mui/icons-material: v5+
- * - react-hot-toast: v2+
- * - framer-motion: v9+
- */
-
-import React, { Fragment, useState, useEffect } from "react";
+import { Fragment, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { Face, MailOutline, PhotoCamera } from "@mui/icons-material";
 import { CircularProgress } from "@mui/material";
-
-// ✅ Redux Toolkit imports
 import {
   updateProfile,
   loadUser,
@@ -33,7 +14,6 @@ import {
   selectUserLoading,
   selectUserError,
 } from "../../features/user/userSlice";
-
 import Loader from "../layout/Loader/Loader";
 import MetaData from "../layout/MetaData";
 
@@ -41,7 +21,6 @@ const UpdateProfile = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // 📊 Redux state
   const user = useSelector(selectUser);
   const loading = useSelector(selectUserLoading);
   const error = useSelector(selectUserError);
@@ -49,23 +28,11 @@ const UpdateProfile = () => {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [avatar, setAvatar] = useState(null);
+  // const [avatar, setAvatar] = useState(null); delet this
   const [avatarPreview, setAvatarPreview] = useState("/Profile.png");
 
-  /**
-   * 📝 Handle form submission
-   */
   const updateProfileSubmit = (e) => {
     e.preventDefault();
-
-    // OLD CODE — BUGGY: FormData was not parsed by the backend profile route.
-    // const formData = new FormData();
-    // formData.append("name", name);
-    // formData.append("email", email);
-    // if (avatar) formData.append("avatar", avatar);
-    // dispatch(updateProfile(formData));
-
-    // NEW CODE — FIX: send the existing base64 preview as JSON so Express can parse it and Cloudinary can upload it.
     const profileData = { name, email };
     if (avatarPreview.startsWith("data:")) {
       profileData.avatar = avatarPreview;
@@ -73,9 +40,6 @@ const UpdateProfile = () => {
     dispatch(updateProfile(profileData));
   };
 
-  /**
-   * 📷 Handle avatar file change
-   */
   const updateProfileDataChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -83,26 +47,23 @@ const UpdateProfile = () => {
       reader.onload = () => {
         if (reader.readyState === 2) {
           setAvatarPreview(reader.result);
-          setAvatar(file);
+          // setAvatar(file); delete this
         }
       };
       reader.readAsDataURL(file);
     }
   };
 
-  // 🔄 Effects
   useEffect(() => {
     if (user) {
       setName(user.name || "");
       setEmail(user.email || "");
       setAvatarPreview(user.avatar?.url || "/Profile.png");
     }
-
     if (error) {
       toast.error(error);
       dispatch(clearErrors());
     }
-
     if (isUpdated) {
       toast.success("Profile updated successfully! 🎉");
       dispatch(loadUser());

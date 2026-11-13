@@ -19,27 +19,28 @@
  * Uncomment when ready to integrate Stripe
  */
 
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
+import axios from "axios";
 import { CreditCard, Event, VpnKey } from "@mui/icons-material";
 import { CircularProgress } from "@mui/material";
 
-// ⚠️ STRIPE - Commented out until implemented
-// import {
-//   CardNumberElement,
-//   CardCvcElement,
-//   CardExpiryElement,
-//   useStripe,
-//   useElements,
-// } from "@stripe/react-stripe-js";
+import {
+  CardNumberElement,
+  CardCvcElement,
+  CardExpiryElement,
+  useStripe,
+  useElements,
+} from "@stripe/react-stripe-js";
 
 // ✅ Redux Toolkit imports
 import {
   selectCartItems,
   selectShippingInfo,
+  clearCart,
 } from "../../features/cart/cartSlice";
 import { selectUser } from "../../features/user/userSlice";
 import {
@@ -67,9 +68,8 @@ const Payment = () => {
   // 💰 Get order info from session
   const orderInfo = JSON.parse(sessionStorage.getItem("orderInfo") || "{}");
 
-  // ⚠️ STRIPE - Commented out until implemented
-  // const stripe = useStripe();
-  // const elements = useElements();
+  const stripe = useStripe();
+  const elements = useElements();
 
   /**
    * 💳 Calculate totals
@@ -98,48 +98,37 @@ const Payment = () => {
     },
   };
 
-  /**
-   * ✅ Handle payment submission
-   * ⚠️ Currently commented out - Stripe not implemented
-   */
   const submitHandler = async (e) => {
     e.preventDefault();
 
-    // 🚫 TEMPORARY: Skip payment and create order directly
-    // Remove this when Stripe is implemented
-    setLoading(true);
-    setTimeout(() => {
-      dispatch(createOrder(order));
-      setLoading(false);
-      navigate("/success");
-    }, 1500);
-    return;
+    if (!stripe || !elements) {
+      toast.error("Stripe is not loaded yet");
+      return;
+    }
 
-    /* ⚠️ STRIPE IMPLEMENTATION - Uncomment when ready
     payBtn.current.disabled = true;
+    setLoading(true);
 
     try {
       const config = {
         headers: {
           "Content-Type": "application/json",
         },
+        withCredentials: true,
       };
       const { data } = await axios.post(
         "/api/v1/payment/process",
         { amount: Math.round(orderInfo.totalPrice * 100) },
-        config
+        config,
       );
-
       const client_secret = data.client_secret;
-
-      if (!stripe || !elements) return;
 
       const result = await stripe.confirmCardPayment(client_secret, {
         payment_method: {
           card: elements.getElement(CardNumberElement),
           billing_details: {
-            name: user.name,
-            email: user.email,
+            name: user?.name || "Guest",
+            email: user?.email || "",
             address: {
               line1: shippingInfo.address,
               city: shippingInfo.city,
@@ -153,24 +142,32 @@ const Payment = () => {
 
       if (result.error) {
         payBtn.current.disabled = false;
+        setLoading(falses);
         toast.error(result.error.message);
       } else {
         if (result.paymentIntent.status === "succeeded") {
-          order.paymentInfo = {
-            id: result.paymentIntent.id,
-            status: result.paymentIntent.status,
+          const finalOrder = {
+            ...order,
+            paymentInfo: {
+              id: result.paymentIntent.id,
+              status: result.paymentIntent.status,
+            },
           };
-          dispatch(createOrder(order));
+          await dispatch(createOrder(finalOrder));
+          dispatch(clearCart());
+          sessionStorage.removeItem("orderInfo");
           navigate("/success");
         } else {
+          payBtn.current.disabled = false;
+          setLoading(false);
           toast.error("There's some issue while processing payment");
         }
       }
     } catch (error) {
       payBtn.current.disabled = false;
+      setLoading(false);
       toast.error(error.response?.data?.message || "Payment failed");
     }
-    */
   };
 
   // 🔄 Effects
@@ -224,18 +221,23 @@ const Payment = () => {
           {/* 📝 Payment Form */}
           <form onSubmit={submitHandler} className="space-y-4">
             {/* ⚠️ Stripe elements - Commented out until implemented */}
+
             <div className="space-y-4">
               {/* Card Number */}
               <div className="relative border-2 border-gray-200 rounded-xl focus-within:border-red-500 transition-colors">
                 <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <div className="pl-10 pr-4 py-3">
-                  {/* ⚠️ Replace with CardNumberElement when Stripe is ready */}
-                  <input
-                    type="text"
-                    placeholder="Card Number"
-                    className="w-full outline-none bg-transparent"
-                    disabled
-                    value="4242 4242 4242 4242"
+                <div className="pl-10 pr-4 py-4">
+                  <CardNumberElement
+                    options={{
+                      style: {
+                        base: {
+                          fontSize: "16px",
+                          color: "#424770",
+                          "::placeholder": { color: "#aab7c4" },
+                        },
+                        invalid: { color: "#ef4444" },
+                      },
+                    }}
                   />
                 </div>
               </div>
@@ -243,13 +245,18 @@ const Payment = () => {
               {/* Expiry Date */}
               <div className="relative border-2 border-gray-200 rounded-xl focus-within:border-red-500 transition-colors">
                 <Event className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <div className="pl-10 pr-4 py-3">
-                  <input
-                    type="text"
-                    placeholder="MM / YY"
-                    className="w-full outline-none bg-transparent"
-                    disabled
-                    value="12 / 25"
+                <div className="pl-10 pr-4 py-4">
+                  <CardExpiryElement
+                    options={{
+                      style: {
+                        base: {
+                          fontSize: "16px",
+                          color: "#424770",
+                          "::placeholder": { color: "#aab7c4" },
+                        },
+                        invalid: { color: "#ef4444" },
+                      },
+                    }}
                   />
                 </div>
               </div>
@@ -257,23 +264,21 @@ const Payment = () => {
               {/* CVC */}
               <div className="relative border-2 border-gray-200 rounded-xl focus-within:border-red-500 transition-colors">
                 <VpnKey className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <div className="pl-10 pr-4 py-3">
-                  <input
-                    type="text"
-                    placeholder="CVC"
-                    className="w-full outline-none bg-transparent"
-                    disabled
-                    value="123"
+                <div className="pl-10 pr-4 py-4">
+                  <CardCvcElement
+                    options={{
+                      style: {
+                        base: {
+                          fontSize: "16px",
+                          color: "#424770",
+                          "::placeholder": { color: "#aab7c4" },
+                        },
+                        invalid: { color: "#ef4444" },
+                      },
+                    }}
                   />
                 </div>
               </div>
-            </div>
-
-            {/* ⚠️ Note: Stripe integration is coming soon */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-sm text-yellow-700">
-              ⚡ Stripe payment integration coming soon.
-              <br />
-              Using demo mode for now.
             </div>
 
             {/* Submit Button */}
@@ -288,7 +293,7 @@ const Payment = () => {
               {loading ? (
                 <CircularProgress size={24} color="inherit" />
               ) : (
-                `Pay ₹${totalPrice.toFixed(2)}`
+                `Pay $${totalPrice.toFixed(2)}`
               )}
             </motion.button>
           </form>

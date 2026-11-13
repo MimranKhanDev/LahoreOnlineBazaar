@@ -1,256 +1,170 @@
-// src/features/orders/orderSlice.js
-
-/**
- * 📋 ORDER SLICE - Manages orders and order details
- *
- * This is like the "Orders Department" in our warehouse
- * It handles:
- * 1. Creating new orders (checkout)
- * 2. Fetching user's orders (My Orders page)
- * 3. Fetching all orders (Admin)
- * 4. Updating order status (Admin)
- * 5. Deleting orders (Admin)
- *
- * 🔄 REPLACES 3 OLD FILES:
- * - constants/orderConstants.js
- * - actions/orderAction.js
- * - reducers/orderReducer.js
- *
- * 🌟 KEY CONCEPT: Multiple Async Thunks
- *    This slice has 5 different async operations
- *    Each one handles a different order-related API call
- */
-
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-// ⚙️ API Base URL
 const API_URL = "/api/v1";
 
-/**
- * 📝 Create New Order
- *
- * 🎯 When to use: After successful payment
- *
- * 📥 Parameters: orderData (shipping info, items, total, payment info)
- *
- * 📤 Returns: Created order data
- *
- * ❓ Why is this important?
- *    This is the final step of checkout!
- *    It saves the order to the database
- */
-export const createOrder = createAsyncThunk(
-  // 📛 Action type: 'orders/create'
-  "orders/create",
+// ============= ASYNC THUNKS =============
 
-  // 🔧 The API call
-  async (orderData) => {
-    const { data } = await axios.post(`${API_URL}/order/new`, orderData, {
-      headers: { "Content-Type": "application/json" },
-    });
-    return data; // Returns order data
+export const createOrder = createAsyncThunk(
+  "orders/create",
+  async (orderData, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.post(`${API_URL}/order/new`, orderData, {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,
+      });
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.response.data.message || error.message);
+    }
   },
 );
 
-/**
- * 📋 Get My Orders (User)
- *
- * 🎯 When to use: "My Orders" page
- *
- * 📤 Returns: Array of user's orders
- *
- * 🔐 Authentication: Requires user to be logged in
- *    The backend uses cookies/session to identify the user
- */
-export const getMyOrders = createAsyncThunk("orders/getMyOrders", async () => {
-  const { data } = await axios.get(`${API_URL}/orders/me`);
-  return data.orders;
-});
+export const getMyOrders = createAsyncThunk(
+  "orders/getMyOrders",
+  async (_, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.get(`${API_URL}/orders/me`, {
+        withCredentials: true,
+      });
+      return data.orders;
+    } catch (error) {
+      return rejectWithValue(error.response.data.message || error.message);
+    }
+  },
+);
 
-/**
- 📋 Get All Orders (Admin)
- * 
- * 🎯 When to use: Admin "All Orders" page
- * 
- * 📤 Returns: Array of all orders (all users)
- * 
- * 🔐 Authentication: Requires admin role
- *    Backend checks user role before returning data
- */
-export const getAllOrders = createAsyncThunk("orders/getAll", async () => {
-  const { data } = await axios.get(`${API_URL}/admin/orders`);
-  return data.orders;
-});
+export const getAllOrders = createAsyncThunk(
+  "orders/getAll",
+  async (_, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.get(`${API_URL}/admin/orders`, {
+        withCredentials: true,
+      });
+      return data.orders;
+    } catch (error) {
+      return rejectWithValue(error.response.data.message || error.message);
+    }
+  },
+);
 
-/**
- * 🔍 Get Order Details
- *
- * 🎯 When to use: Order Details page (view specific order)
- *
- * 📥 Parameters: id - Order ID
- *
- * 📤 Returns: Single order object with all details
- */
 export const getOrderDetails = createAsyncThunk(
   "orders/getDetails",
-  async (id) => {
-    const { data } = await axios.get(`${API_URL}/order/${id}`);
-    return data.order;
+  async (id, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.get(`${API_URL}/order/${id}`, {
+        withCredentials: true,
+      });
+      return data.order;
+    } catch (error) {
+      return rejectWithValue(error.response.data.message || error.message);
+    }
   },
 );
 
-/**
- * ✏️ Update Order Status (Admin)
- *
- * 🎯 When to use: Admin "Process Order" page
- *
- * 📥 Parameters:
- *    - id: Order ID
- *    - orderData: { status: "Shipped" | "Delivered" | "Cancelled" }
- *
- * 📤 Returns: success (boolean)
- *
- * 🔐 Authentication: Requires admin role
- *
- * ❓ Why is this important?
- *    This is how admins update order status
- *    Example: Processing → Shipped → Delivered
- */
 export const updateOrderStatus = createAsyncThunk(
   "orders/updateStatus",
-  async ({ id, orderData }) => {
-    const { data } = await axios.put(
-      `${API_URL}/admin/order/${id}`,
-      orderData,
-      { headers: { "Content-Type": "application/json" } },
-    );
-    return data.success;
+  async ({ id, orderData }, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.put(
+        `${API_URL}/admin/order/${id}`,
+        orderData,
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        },
+      );
+      return data.success;
+    } catch (error) {
+      return rejectWithValue(error.response.data.message || error.message);
+    }
   },
 );
 
-/**
- * 🗑️ Delete Order (Admin)
- *
- * 🎯 When to use: Admin "All Orders" page (delete button)
- *
- * 📥 Parameters: id - Order ID
- *
- * 📤 Returns: success (boolean)
- *
- * 🔐 Authentication: Requires admin role
- */
-export const deleteOrder = createAsyncThunk("orders/delete", async (id) => {
-  const { data } = await axios.delete(`${API_URL}/admin/order/${id}`);
-  return data.success;
-});
+export const deleteOrder = createAsyncThunk(
+  "orders/delete",
+  async (id, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.delete(`${API_URL}/admin/order/${id}`, {
+        withCredentials: true,
+      });
+      return data.success;
+    } catch (error) {
+      return rejectWithValue(error.response.data.message || error.message);
+    }
+  },
+);
 
-/**
- * 🎨 Create Order Slice
- *
- * This slice manages ALL order-related state
- * Different parts of the app use different order data:
- * - User: My orders
- * - Admin: All orders, process orders
- * - Checkout: Create order
- * - Order Details: Single order
- */
+export const getSales = createAsyncThunk(
+  "orders/getSales",
+  async (_, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.get(`${API_URL}/admin/get_sales`, {
+        withCredentials: true,
+      });
+      return data; // Returns { totalSales, totalNumOrders, sales }
+    } catch (error) {
+      return rejectWithValue(error.response.data.message || error.message);
+    }
+  },
+);
+// ============= SLICE =============
+
 const orderSlice = createSlice({
   name: "orders",
-
-  /**
-   * 🏪 Initial State - All order-related data
-   *
-   * Each "bin" holds different order data:
-   * - order: Newly created order
-   * - myOrders: User's orders
-   * - allOrders: All orders (admin)
-   * - orderDetails: Single order details
-   * - isUpdated/isDeleted: Status flags
-   */
   initialState: {
-    // 📝 New Order
-    order: null, // Created order data
-    orderLoading: false, // Is order being created?
-    orderError: null, // Order creation error
+    order: null,
+    orderLoading: false,
+    orderError: null,
 
-    // 📋 My Orders
-    myOrders: [], // User's orders array
-    myOrdersLoading: false, // Are my orders loading?
-    myOrdersError: null, // My orders error
+    myOrders: [],
+    myOrdersLoading: false,
+    myOrdersError: null,
 
-    // 📋 All Orders (Admin)
-    allOrders: [], // All orders array
-    allOrdersLoading: false, // Are all orders loading?
-    allOrdersError: null, // All orders error
+    allOrders: [],
+    allOrdersLoading: false,
+    allOrdersError: null,
 
-    // 🔍 Order Details
-    orderDetails: null, // Single order object
-    orderDetailsLoading: false, // Is order details loading?
-    orderDetailsError: null, // Order details error
+    orderDetails: null,
+    orderDetailsLoading: false,
+    orderDetailsError: null,
 
-    // ✏️ Update/Delete Status
-    isUpdated: false, // Was order updated?
-    isDeleted: false, // Was order deleted?
+    sales: [],
+
+    loading: false,
+    error: null,
+
+    isUpdated: false,
+    isDeleted: false,
   },
-
-  /**
-   * 🔄 Synchronous Reducers
-   *
-   * These handle actions that don't need API calls
-   * Mostly clearing errors and resetting status flags
-   */
   reducers: {
-    /**
-     * 🧹 Clear Order Errors
-     *
-     * Resets all order-related errors
-     * Called after showing error messages
-     */
     clearOrderErrors: (state) => {
       state.orderError = null;
       state.myOrdersError = null;
       state.allOrdersError = null;
       state.orderDetailsError = null;
+      state.error = null; // ✅ Clear generic error
     },
-
-    /**
-     * 🧹 Clear Order Status
-     *
-     * Resets update/delete status flags
-     * Called after success messages are shown
-     */
     clearOrderStatus: (state) => {
       state.isUpdated = false;
       state.isDeleted = false;
     },
   },
-
-  /**
-   * ⚡ Async Reducers (extraReducers)
-   *
-   * Handles the 3 states (pending, fulfilled, rejected) for each async action
-   *
-   * 🎯 Pattern: For each thunk, we handle:
-   *    - PENDING: Set loading = true
-   *    - FULFILLED: Set loading = false, store data
-   *    - REJECTED: Set loading = false, store error
-   */
   extraReducers: (builder) => {
     builder
       // ============= CREATE ORDER =============
       .addCase(createOrder.pending, (state) => {
-        state.orderLoading = true; // Show loading
-        state.orderError = null; // Clear previous error
+        state.orderLoading = true;
+        state.orderError = null;
       })
       .addCase(createOrder.fulfilled, (state, action) => {
-        state.orderLoading = false; // Hide loading
-        state.order = action.payload; // Store created order
+        state.orderLoading = false;
+        state.order = action.payload;
         state.orderError = null;
       })
       .addCase(createOrder.rejected, (state, action) => {
         state.orderLoading = false;
-        state.orderError = action.error.message || "Failed to create order";
+        state.orderError = action.payload || "Failed to create order"; // ✅ Fixed
       })
 
       // ============= GET MY ORDERS =============
@@ -260,12 +174,12 @@ const orderSlice = createSlice({
       })
       .addCase(getMyOrders.fulfilled, (state, action) => {
         state.myOrdersLoading = false;
-        state.myOrders = action.payload; // Store user's orders
+        state.myOrders = action.payload;
         state.myOrdersError = null;
       })
       .addCase(getMyOrders.rejected, (state, action) => {
         state.myOrdersLoading = false;
-        state.myOrdersError = action.error.message || "Failed to fetch orders";
+        state.myOrdersError = action.payload || "Failed to fetch orders"; // ✅ Fixed
       })
 
       // ============= GET ALL ORDERS (Admin) =============
@@ -275,13 +189,25 @@ const orderSlice = createSlice({
       })
       .addCase(getAllOrders.fulfilled, (state, action) => {
         state.allOrdersLoading = false;
-        state.allOrders = action.payload; // Store all orders
+        state.allOrders = action.payload;
         state.allOrdersError = null;
       })
       .addCase(getAllOrders.rejected, (state, action) => {
         state.allOrdersLoading = false;
-        state.allOrdersError =
-          action.error.message || "Failed to fetch all orders";
+        state.allOrdersError = action.payload || "Failed to fetch all orders"; // ✅ Fixed
+      })
+
+      // ============= GET SALES =============
+      .addCase(getSales.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getSales.fulfilled, (state, action) => {
+        state.loading = false;
+        state.sales = action.payload.sales;
+      })
+      .addCase(getSales.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       })
 
       // ============= GET ORDER DETAILS =============
@@ -291,30 +217,30 @@ const orderSlice = createSlice({
       })
       .addCase(getOrderDetails.fulfilled, (state, action) => {
         state.orderDetailsLoading = false;
-        state.orderDetails = action.payload; // Store order details
+        state.orderDetails = action.payload;
         state.orderDetailsError = null;
       })
       .addCase(getOrderDetails.rejected, (state, action) => {
         state.orderDetailsLoading = false;
         state.orderDetailsError =
-          action.error.message || "Failed to fetch order details";
+          action.payload || "Failed to fetch order details"; // ✅ Fixed
       })
 
       // ============= UPDATE ORDER STATUS =============
       .addCase(updateOrderStatus.pending, (state) => {
-        state.loading = true;
+        state.loading = true; // ✅ Now exists in initialState
         state.isUpdated = false;
         state.error = null;
       })
       .addCase(updateOrderStatus.fulfilled, (state) => {
         state.loading = false;
-        state.isUpdated = true; // Flag for success
+        state.isUpdated = true;
         state.error = null;
       })
       .addCase(updateOrderStatus.rejected, (state, action) => {
         state.loading = false;
         state.isUpdated = false;
-        state.error = action.error.message || "Failed to update order";
+        state.error = action.payload || "Failed to update order"; // ✅ Fixed
       })
 
       // ============= DELETE ORDER =============
@@ -325,33 +251,19 @@ const orderSlice = createSlice({
       })
       .addCase(deleteOrder.fulfilled, (state) => {
         state.loading = false;
-        state.isDeleted = true; // Flag for success
+        state.isDeleted = true;
         state.error = null;
       })
       .addCase(deleteOrder.rejected, (state, action) => {
         state.loading = false;
         state.isDeleted = false;
-        state.error = action.error.message || "Failed to delete order";
+        state.error = action.payload || "Failed to delete order"; // ✅ Fixed
       });
   },
 });
 
-/**
- * 📤 Export Sync Actions
- */
 export const { clearOrderErrors, clearOrderStatus } = orderSlice.actions;
 
-/**
- * 📤 Export Selectors
- *
- * These "receptionists" get specific order data
- *
- * ❓ Why only 2 selectors?
- *    We export what components need:
- *    - My Orders page needs myOrders
- *    - Order Details page needs orderDetails
- *    - Other components can access via state.orders.xxx
- */
 export const selectMyOrders = (state) => state.orders.myOrders;
 export const selectOrderDetails = (state) => state.orders.orderDetails;
 export const selectMyOrdersLoading = (state) => state.orders.myOrdersLoading;
@@ -361,10 +273,10 @@ export const selectAllOrdersLoading = (state) => state.orders.allOrdersLoading;
 export const selectAllOrdersError = (state) => state.orders.allOrdersError;
 export const selectOrderDetailsLoading = (state) =>
   state.orders.orderDetailsLoading;
+
+export const selectSales = (state) => state.orders.sales;
+
 export const selectOrderDetailsError = (state) =>
   state.orders.orderDetailsError;
 
-/**
- * 📤 Export Reducer
- */
 export default orderSlice.reducer;

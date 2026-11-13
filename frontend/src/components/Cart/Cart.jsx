@@ -20,7 +20,7 @@
  * - cartSlice: addToCart, removeFromCart
  */
 
-import React, { Fragment } from "react";
+import { Fragment } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -42,6 +42,8 @@ import {
   selectCartItemsCount,
 } from "../../features/cart/cartSlice";
 
+import { selectIsAuthenticated } from "../../features/user/userSlice";
+
 import CartItemCard from "./CartItemCard";
 import MetaData from "../layout/MetaData";
 import { Link } from "react-router-dom";
@@ -53,6 +55,7 @@ const Cart = () => {
   // 📊 Redux state
   const cartItems = useSelector(selectCartItems);
   const totalPrice = useSelector(selectCartTotal);
+  const isAuthenticated = useSelector(selectIsAuthenticated);
   const itemsCount = useSelector(selectCartItemsCount);
 
   /**
@@ -105,7 +108,11 @@ const Cart = () => {
    * ✅ Proceed to checkout
    */
   const checkoutHandler = () => {
-    navigate("/login?redirect=shipping");
+    if (isAuthenticated) {
+      navigate("/shipping"); // ✅ Bypass login if already authenticated
+    } else {
+      navigate("/login?redirect=shipping");
+    }
   };
 
   return (
@@ -204,7 +211,7 @@ const Cart = () => {
                   <div className="space-y-4">
                     <div className="flex justify-between text-gray-600">
                       <span>Subtotal</span>
-                      <span>₹{totalPrice.toFixed(2)}</span>
+                      <span>${totalPrice.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-gray-600">
                       <span>Shipping</span>
@@ -212,12 +219,12 @@ const Cart = () => {
                     </div>
                     <div className="flex justify-between text-gray-600 border-b pb-4">
                       <span>Tax (18% GST)</span>
-                      <span>₹{(totalPrice * 0.18).toFixed(2)}</span>
+                      <span>${(totalPrice * 0.18).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-xl font-bold pt-2">
                       <span>Total</span>
                       <span className="text-red-500">
-                        ₹{(totalPrice + totalPrice * 0.18).toFixed(2)}
+                        ${(totalPrice + totalPrice * 0.18).toFixed(2)}
                       </span>
                     </div>
                   </div>

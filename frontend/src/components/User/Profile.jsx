@@ -1,21 +1,6 @@
-// src/components/User/Profile.jsx
-
-/**
- * 👤 PROFILE - User profile page
- *
- * Features:
- * 1. Display user information (name, email, join date)
- * 2. Avatar display
- * 3. Links to edit profile, change password, view orders
- *
- * 📦 Packages Used:
- * - react-hot-toast: v2+
- * - framer-motion: v9+
- */
-
-import React, { Fragment, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import React, { Fragment } from "react";
+import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import {
@@ -26,35 +11,14 @@ import {
   FaKey,
   FaShoppingBag,
 } from "react-icons/fa";
-
-// ✅ Redux Toolkit selectors
-import {
-  selectUser,
-  selectUserLoading,
-  selectIsAuthenticated,
-} from "../../features/user/userSlice";
+import { selectUser, selectUserLoading } from "../../features/user/userSlice";
 
 import Loader from "../layout/Loader/Loader";
 import MetaData from "../layout/MetaData";
 
 const Profile = () => {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-
-  // 📊 Redux state
   const user = useSelector(selectUser);
   const loading = useSelector(selectUserLoading);
-  const isAuthenticated = useSelector(selectIsAuthenticated);
-
-  // 🔄 Redirect if not authenticated
-  useEffect(() => {
-    if (!isAuthenticated) {
-      toast.error("Please login to view your profile");
-      navigate("/login");
-    }
-  }, [isAuthenticated, navigate]);
-
-  // 📅 Format join date
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     const date = new Date(dateString);

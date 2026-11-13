@@ -1,35 +1,6 @@
-// src/features/products/productSlice.js
-
-/**
- * 📦 PRODUCT SLICE - Manages products, reviews, and admin operations
- *
- * This is like the "Products Department" in our warehouse
- * It handles:
- * 1. Fetching products from the server (API calls)
- * 2. Creating new products (admin)
- * 3. Updating products (admin)
- * 4. Deleting products (admin)
- * 5. Product reviews
- *
- * 🔄 REPLACES 3 OLD FILES:
- * - constants/productConstants.js
- * - actions/productAction.js
- * - reducers/productReducer.js
- *
- * 🌟 KEY CONCEPT: createAsyncThunk
- *    This is what makes API calls work with Redux
- *    It handles the 3 states of an API call:
- *    1. PENDING: "I'm fetching data..."
- *    2. FULFILLED: "I got the data!"
- *    3. REJECTED: "Something went wrong"
- */
-
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-// ⚙️ API Base URL
-// All our API endpoints start with /api/v1
-// Example: /api/v1/products, /api/v1/login
 const API_URL = "/api/v1";
 
 /**
@@ -57,32 +28,15 @@ const API_URL = "/api/v1";
  *    - return data → What gets sent to the reducer on success
  */
 
-/**
- * 📋 Get All Products (with filters)
- *
- * 🎯 When to use: Home page, Products page, Search results
- *
- * 📥 Parameters (what you can filter by):
- *    - keyword: Search term (e.g., "iphone")
- *    - currentPage: Which page of results (for pagination)
- *    - price: Price range [min, max]
- *    - category: Product category
- *    - ratings: Minimum rating
- *
- * 📤 Returns: { products, productsCount, resultPerPage, filteredProductsCount }
- */
 export const getProducts = createAsyncThunk(
-  // 📛 Action type: 'products/getAll'
   "products/getAll",
-  // 🔧 The actual API call function
   async ({
-    keyword = "", // Default: empty (no search)
-    currentPage = 1, // Default: first page
-    price = [0, 1000000], // Default: include the seeded catalog price range
-    category = "", // Default: no category filter
-    ratings = 0, // Default: any rating
+    keyword = "",
+    currentPage = 1,
+    price = [0, 1000000],
+    category = "",
+    ratings = 0,
   }) => {
-    // 🔨 Build the query string (the URL parameters)
     // Example: /api/v1/products?keyword=iphone&page=1&price[gte]=0&price[lte]=25000
     let link = `${API_URL}/products?keyword=${encodeURIComponent(
       keyword,
@@ -91,145 +45,128 @@ export const getProducts = createAsyncThunk(
     if (ratings > 0) {
       link += `&ratings[gte]=${ratings}`;
     }
-    // ➕ Add category if provided
     if (category) {
       link += `&category=${category}`;
     }
-    // 🌐 Make the API request
     const { data } = await axios.get(link);
     // 📦 Return the data (this becomes action.payload in fulfilled state)
     return data;
   },
 );
 
-/**
- * 📋 Get All Products for Admin
- *
- * 🎯 When to use: Admin dashboard (to manage products)
- *
- * 🔐 This is admin-only (authentication handled by backend)
- */
 export const getAdminProducts = createAsyncThunk(
   "products/getAdmin",
-  async () => {
-    const { data } = await axios.get(`${API_URL}/admin/products`);
-    return data.products;
+  async (_, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.get(`${API_URL}/admin/products`, {
+        withCredentials: true,
+      });
+      return data.products;
+    } catch (error) {
+      return rejectWithValue(error.response.data.message || payload);
+    }
   },
 );
 
-/**
- * ➕ Create New Product (Admin only)
- *
- * 🎯 When to use: Admin "Create Product" page
- *
- * 📥 Parameters: productData (form data with name, price, description, etc.)
- *
- * 📤 Returns: The created product data
- */
 export const createProduct = createAsyncThunk(
   "products/create",
-  async (productData) => {
-    const { data } = await axios.post(
-      `${API_URL}/admin/product/new`,
-      productData,
-      { headers: { "Content-Type": "application/json" } },
-    );
-    return data;
+  async (productData, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.post(
+        `${API_URL}/admin/product/new`,
+        productData,
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        },
+      );
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.response.data.message || payload);
+    }
   },
 );
 
-/**
- * ✏️ Update Product (Admin only)
- *
- * 🎯 When to use: Admin "Edit Product" page
- *
- * 📥 Parameters:
- *    - id: Product ID to update
- *    - productData: Updated product data
- *
- * 📤 Returns: success (boolean)
- */
 export const updateProduct = createAsyncThunk(
   "products/update",
-  async ({ id, productData }) => {
-    const { data } = await axios.put(
-      `${API_URL}/admin/product/${id}`,
-      productData,
-      { headers: { "Content-Type": "application/json" } },
-    );
-    return data.success;
+  async ({ id, productData }, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.put(
+        `${API_URL}/admin/product/${id}`,
+        productData,
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        },
+      );
+      return data.success;
+    } catch (error) {
+      return rejectWithValue(error.response.data.message || payload);
+    }
   },
 );
 
-/**
- * 🗑️ Delete Product (Admin only)
- *
- * 🎯 When to use: Admin product list (delete button)
- */
-export const deleteProduct = createAsyncThunk("products/delete", async (id) => {
-  const { data } = await axios.delete(`${API_URL}/admin/product/${id}`);
-  return data.success;
-});
+export const deleteProduct = createAsyncThunk(
+  "products/delete",
+  async (id, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.delete(`${API_URL}/admin/product/${id}`);
+      return data.success;
+    } catch (error) {
+      return rejectWithValue(error.response.data.message || payload);
+    }
+  },
+);
 
-/**
- * 🔍 Get Single Product Details
- *
- * 🎯 When to use: Product Details page (when user clicks a product)
- *
- * 📥 Parameters: id - Product ID
- *
- * 📤 Returns: Product object with all details
- */
 export const getProductDetails = createAsyncThunk(
   "products/getDetails",
-  async (id) => {
-    const { data } = await axios.get(`${API_URL}/product/${id}`);
-    return data.product;
+  async (id, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.get(`${API_URL}/product/${id}`);
+      return data.product;
+    } catch (error) {
+      return rejectWithValue(error.response.data.message || payload);
+    }
   },
 );
 
-/**
- * ⭐ Create/Update Product Review
- *
- * 🎯 When to use: Product Details page (user submits review)
- *
- * 📥 Parameters: reviewData { rating, comment, productId }
- *
- * 📤 Returns: success (boolean)
- */
 export const createReview = createAsyncThunk(
   "products/createReview",
-  async (reviewData) => {
-    const { data } = await axios.put(`${API_URL}/review`, reviewData, {
-      headers: { "Content-Type": "application/json" },
-    });
-    return data.success;
+  async (reviewData, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.put(`${API_URL}/review`, reviewData, {
+        headers: { "Content-Type": "application/json" },
+      });
+      return data.success;
+    } catch (error) {
+      return rejectWithValue(error.response.data.message || payload);
+    }
   },
 );
 
-/**
- * 📋 Get All Reviews for a Product (Admin only)
- *
- * 🎯 When to use: Admin "Manage Reviews" page
- */
 export const getProductReviews = createAsyncThunk(
   "products/getReviews",
-  async (productId) => {
-    const { data } = await axios.get(`${API_URL}/reviews?id=${productId}`);
-    return data.reviews;
+  async (productId, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.get(`${API_URL}/reviews?id=${productId}`);
+      return data.reviews;
+    } catch (error) {
+      return rejectWithValue(error.response.data.message || payload);
+    }
   },
 );
 
-/**
- * 🗑️ Delete Review (Admin only)
- */
 export const deleteReview = createAsyncThunk(
   "products/deleteReview",
-  async ({ reviewId, productId }) => {
-    const { data } = await axios.delete(
-      `${API_URL}/reviews?id=${reviewId}&productId=${productId}`,
-    );
-    return data.success;
+  async ({ reviewId, productId }, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.delete(
+        `${API_URL}/reviews?id=${reviewId}&productId=${productId}`,
+      );
+      return data.success;
+    } catch (error) {
+      return rejectWithValue(error.response.data.message || payload);
+    }
   },
 );
 
@@ -248,46 +185,39 @@ export const deleteReview = createAsyncThunk(
  */
 const productSlice = createSlice({
   name: "products",
-
-  /**
-   * 🏪 Initial State - All the data this slice manages
-   *
-   * Think of this as all the "bins" in our products department
-   * Each bin holds different data:
-   * - products: All products from API
-   * - product: Single product details
-   * - reviews: Product reviews
-   * - loading: Are we fetching data?
-   * - error: Did something go wrong?
-   */
   initialState: {
     // 🏪 All Products State (for product listing pages)
-    products: [], // Array of product objects
-    productsCount: 0, // Total number of products
-    resultPerPage: 0, // Products per page
-    filteredProductsCount: 0, // Products after filters applied
-    loading: false, // Are we fetching products?
-    error: null, // Error if any
+    products: [],
+    productsCount: 0,
+    resultPerPage: 0,
+    filteredProductsCount: 0,
+    loading: false,
+    error: null,
+
     // 🔍 Single Product State (for product detail page)
-    product: null, // Single product object
-    productLoading: false, // Is product details loading?
-    productError: null, // Error for product details
+    product: null,
+    productLoading: false,
+    productError: null,
     // ⭐ Review State
-    reviewSuccess: false, // Did review succeed?
-    reviewLoading: false, // Is review being submitted?
-    reviewError: null, // Review error
+
+    reviewSuccess: false,
+    reviewLoading: false,
+    reviewError: null,
+
     // 📋 Admin Products State
-    adminProducts: [], // All products for admin
-    adminLoading: false, // Is admin products loading?
-    adminError: null, // Admin products error
+    adminProducts: [],
+    adminLoading: false,
+    adminError: null,
+
     // 📋 Reviews State (Admin)
-    reviews: [], // All reviews for a product
-    reviewsLoading: false, // Are reviews loading?
-    reviewsError: null, // Reviews error
+    reviews: [],
+    reviewsLoading: false,
+    reviewsError: null,
+
     // 🗑️ Delete/Update Product Status
-    isDeleted: false, // Was product deleted?
-    isUpdated: false, // Was product updated?
-    reviewDeleted: false, // Was review deleted?
+    isDeleted: false,
+    isUpdated: false,
+    reviewDeleted: false,
   },
 
   /**
@@ -303,13 +233,10 @@ const productSlice = createSlice({
    */
   reducers: {
     /**
-     * 🧹 Clear Errors
-     *
      * Used to clear error messages after showing them
      * Example: After showing "Product not found", clear the error
      */
     clearErrors: (state) => {
-      // Reset all error states to null
       state.error = null;
       state.productError = null;
       state.reviewError = null;
@@ -319,7 +246,6 @@ const productSlice = createSlice({
 
     /**
      * 🧹 Clear Product Status
-     *
      * Used after delete/update operations
      * Resets success flags so they don't trigger again
      */
@@ -332,7 +258,6 @@ const productSlice = createSlice({
 
     /**
      * 🧹 Reset Product
-     *
      * Used when navigating away from product details
      * Clears product data so old data doesn't show
      */
@@ -375,24 +300,23 @@ const productSlice = createSlice({
   extraReducers: (builder) => {
     builder
       // ============= GET ALL PRODUCTS =============
-      // 📥 PENDING: Request is being sent
       .addCase(getProducts.pending, (state) => {
-        state.loading = true; // Show loading spinner
-        state.error = null; // Clear previous errors
+        state.loading = true;
+        state.error = null;
       })
       // ✅ FULFILLED: Request succeeded
       .addCase(getProducts.fulfilled, (state, action) => {
-        state.loading = false; // Hide loading spinner
-        state.products = action.payload.products; // Store products
+        state.loading = false;
+        state.products = action.payload.products;
         state.productsCount = action.payload.productsCount;
         state.resultPerPage = action.payload.resultPerPage;
         state.filteredProductsCount = action.payload.filteredProductsCount;
-        state.error = null; // No error
+        state.error = null;
       })
       // ❌ REJECTED: Request failed
       .addCase(getProducts.rejected, (state, action) => {
-        state.loading = false; // Hide loading spinner
-        state.error = action.error.message || "Failed to fetch products";
+        state.loading = false;
+        state.error = action.payload || "Failed to fetch products";
       })
 
       // ============= GET ADMIN PRODUCTS =============
@@ -407,23 +331,22 @@ const productSlice = createSlice({
       })
       .addCase(getAdminProducts.rejected, (state, action) => {
         state.adminLoading = false;
-        state.adminError =
-          action.error.message || "Failed to fetch admin products";
+        state.adminError = action.payload || "Failed to fetch admin products";
       })
 
       // ============= CREATE PRODUCT =============
       .addCase(createProduct.pending, (state) => {
-        state.loading = true; // Show loading while creating
+        state.loading = true;
         state.error = null;
       })
       .addCase(createProduct.fulfilled, (state) => {
         state.loading = false;
-        state.isUpdated = true; // Flag for success
+        state.isUpdated = true;
         state.error = null;
       })
       .addCase(createProduct.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || "Failed to create product";
+        state.error = action.payload || "Failed to create product";
       })
 
       // ============= UPDATE PRODUCT =============
@@ -434,13 +357,13 @@ const productSlice = createSlice({
       })
       .addCase(updateProduct.fulfilled, (state) => {
         state.loading = false;
-        state.isUpdated = true; // Flag for success
+        state.isUpdated = true;
         state.error = null;
       })
       .addCase(updateProduct.rejected, (state, action) => {
         state.loading = false;
         state.isUpdated = false;
-        state.error = action.error.message || "Failed to update product";
+        state.error = action.payload || "Failed to update product";
       })
 
       // ============= DELETE PRODUCT =============
@@ -451,29 +374,29 @@ const productSlice = createSlice({
       })
       .addCase(deleteProduct.fulfilled, (state) => {
         state.loading = false;
-        state.isDeleted = true; // Flag for success
+        state.isDeleted = true;
         state.error = null;
       })
       .addCase(deleteProduct.rejected, (state, action) => {
         state.loading = false;
         state.isDeleted = false;
-        state.error = action.error.message || "Failed to delete product";
+        state.error = action.payload || "Failed to delete product";
       })
 
       // ============= GET PRODUCT DETAILS =============
       .addCase(getProductDetails.pending, (state) => {
-        state.productLoading = true; // Show loading spinner
+        state.productLoading = true;
         state.productError = null;
       })
       .addCase(getProductDetails.fulfilled, (state, action) => {
         state.productLoading = false;
-        state.product = action.payload; // Store product details
+        state.product = action.payload;
         state.productError = null;
       })
       .addCase(getProductDetails.rejected, (state, action) => {
         state.productLoading = false;
         state.productError =
-          action.error.message || "Failed to fetch product details";
+          action.payload || "Failed to fetch product details";
       })
 
       // ============= CREATE REVIEW =============
@@ -484,13 +407,13 @@ const productSlice = createSlice({
       })
       .addCase(createReview.fulfilled, (state) => {
         state.reviewLoading = false;
-        state.reviewSuccess = true; // Flag for success
+        state.reviewSuccess = true;
         state.reviewError = null;
       })
       .addCase(createReview.rejected, (state, action) => {
         state.reviewLoading = false;
         state.reviewSuccess = false;
-        state.reviewError = action.error.message || "Failed to create review";
+        state.reviewError = action.payload || "Failed to create review";
       })
 
       // ============= GET PRODUCT REVIEWS =============
@@ -505,7 +428,7 @@ const productSlice = createSlice({
       })
       .addCase(getProductReviews.rejected, (state, action) => {
         state.reviewsLoading = false;
-        state.reviewsError = action.error.message || "Failed to fetch reviews";
+        state.reviewsError = action.payload || "Failed to fetch reviews";
       })
 
       // ============= DELETE REVIEW =============
@@ -516,13 +439,13 @@ const productSlice = createSlice({
       })
       .addCase(deleteReview.fulfilled, (state) => {
         state.loading = false;
-        state.reviewDeleted = true; // Flag for success
+        state.reviewDeleted = true;
         state.error = null;
       })
       .addCase(deleteReview.rejected, (state, action) => {
         state.loading = false;
         state.reviewDeleted = false;
-        state.error = action.error.message || "Failed to delete review";
+        state.error = action.payload || "Failed to delete review";
       });
   },
 });

@@ -12,7 +12,7 @@
  * - productSlice: getProductDetails, updateProduct, clearErrors
  */
 
-import React, { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -57,7 +57,10 @@ const UpdateProduct = () => {
   const navigate = useNavigate();
 
   // 📊 Redux state
-  const { product, loading, error } = useSelector(selectProductDetails);
+  const product = useSelector(selectProductDetails);
+  const loading = useSelector(selectProductDetailsLoading);
+  const error = useSelector(selectProductDetailsError);
+
   const { isUpdated, loading: updateLoading } = useSelector(
     (state) => state.products,
   );
@@ -125,50 +128,38 @@ const UpdateProduct = () => {
       return;
     }
 
-    // OLD CODE — BUGGY: FormData was not parsed by the backend, so product updates lost their fields.
-    // const formData = new FormData();
-    // formData.append("name", name);
-    // formData.append("price", price);
-    // formData.append("description", description);
-    // formData.append("category", category);
-    // formData.append("Stock", stock);
-    // images.forEach((image) => formData.append("images", image));
-    // dispatch(updateProduct({ id, productData: formData }));
-
-    // NEW CODE — FIX: send the existing base64 image data as JSON for Express and Cloudinary.
-    dispatch(
-      updateProduct({
-        id,
-        productData: {
-          name,
-          price,
-          description,
-          category,
-          Stock: stock,
-          images,
-        },
-      }),
-    );
+    const productData = {
+      name,
+      price,
+      description,
+      category,
+      Stock: stock,
+    };
+    // ✅ Only send images if new ones were uploaded
+    if (images.length > 0) {
+      productData.images = images;
+    }
+    dispatch(updateProduct({ id, productData }));
   };
 
-  // 🔄 Effects
+  // 🔄 Fetch product on mount
+  useEffect(() => {
+    if (id) {
+      dispatch(getProductDetails(id));
+    }
+  }, [dispatch, id]);
+  // 🔄 Handle Errors and Update Success
   useEffect(() => {
     if (error) {
       toast.error(error);
       dispatch(clearErrors());
     }
-
     if (isUpdated) {
       toast.success("Product updated successfully! 🎉");
       dispatch(clearProductStatus());
       navigate("/admin/products");
     }
-
-    // Fetch product details
-    if (id) {
-      dispatch(getProductDetails(id));
-    }
-  }, [dispatch, id, error, isUpdated, navigate]);
+  }, [dispatch, error, isUpdated, navigate]);
 
   // Populate form when product loads
   useEffect(() => {
@@ -227,7 +218,7 @@ const UpdateProduct = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <TextField
                     fullWidth
-                    label="Price (₹)"
+                    label="Price ($)"
                     type="number"
                     variant="outlined"
                     value={price}

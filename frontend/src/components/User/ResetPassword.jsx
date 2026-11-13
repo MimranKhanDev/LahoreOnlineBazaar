@@ -1,36 +1,17 @@
-// src/components/User/ResetPassword.jsx
-
-/**
- * 🔄 RESET PASSWORD - Set new password with token
- *
- * Features:
- * 1. New password input
- * 2. Confirm password input
- * 3. Password validation
- * 4. Token-based reset
- *
- * 📦 Packages Used:
- * - @mui/icons-material: v5+
- * - react-hot-toast: v2+
- * - framer-motion: v9+
- */
-
-import React, { Fragment, useState, useEffect } from "react";
+import { Fragment, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { LockOpen, Lock, Visibility, VisibilityOff } from "@mui/icons-material";
 import { CircularProgress } from "@mui/material";
-
-// ✅ Redux Toolkit imports
 import {
   resetPassword,
   clearErrors,
+  clearMessages,
   selectUserLoading,
   selectUserError,
 } from "../../features/user/userSlice";
-
 import Loader from "../layout/Loader/Loader";
 import MetaData from "../layout/MetaData";
 
@@ -39,7 +20,6 @@ const ResetPassword = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // 📊 Redux state
   const loading = useSelector(selectUserLoading);
   const error = useSelector(selectUserError);
   const { isUpdated } = useSelector((state) => state.user);
@@ -49,36 +29,29 @@ const ResetPassword = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  /**
-   * 🔄 Handle form submission
-   */
   const resetPasswordSubmit = (e) => {
     e.preventDefault();
-
     if (password !== confirmPassword) {
       toast.error("Passwords do not match");
       return;
     }
-
-    if (password.length < 6) {
-      toast.error("Password must be at least 6 characters");
+    if (password.length < 8) {
+      toast.error("Password must be at least 8 characters");
       return;
     }
-
     dispatch(
       resetPassword({ token, passwords: { password, confirmPassword } }),
     );
   };
 
-  // 🔄 Effects
   useEffect(() => {
     if (error) {
       toast.error(error);
       dispatch(clearErrors());
     }
-
     if (isUpdated) {
       toast.success("Password updated successfully! 🎉");
+      dispatch(clearMessages());
       navigate("/login");
     }
   }, [dispatch, error, isUpdated, navigate]);

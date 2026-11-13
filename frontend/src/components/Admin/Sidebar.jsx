@@ -1,22 +1,4 @@
-// src/components/Admin/Sidebar.jsx
-
-/**
- * 📋 SIDEBAR - Admin navigation sidebar
- *
- * Features:
- * 1. Dashboard link
- * 2. Products tree (All, Create)
- * 3. Orders link
- * 4. Users link
- * 5. Reviews link
- *
- * 📦 Packages Used:
- * - @mui/icons-material: v5+ (icons)
- * - react-router-dom: v6 (navigation)
- * - framer-motion: v9+ (animations)
- */
-
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -35,7 +17,12 @@ import logo from "../../images/logo.jpg";
 const Sidebar = () => {
   const location = useLocation();
   const [isProductsOpen, setIsProductsOpen] = useState(false);
-
+  // ✅ Auto-expand products menu if a child route is active (e.g., on refresh)
+  useEffect(() => {
+    if (location.pathname.startsWith("/admin/product")) {
+      setIsProductsOpen(true);
+    }
+  }, [location.pathname]);
   /**
    * 🎯 Check if link is active
    */

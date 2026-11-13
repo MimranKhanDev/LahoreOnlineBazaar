@@ -1,3 +1,11 @@
+## Packages for backend
+
+### Stripe
+
+npm i -g @stripe/cli@latest
+stripe login
+stripe listen --forward-to localhost:4000/api/v1/payment/webhook --events checkout.session.completed
+
 npm i bcryptjs jsonwebtoken validator nodemailer cookie-parser body-parser
 npm i cloudinary, productid = cld-sample-56
 
@@ -18,3 +26,7 @@ Update UI or navigate
 ### working with Redux
 
 we need reducers, actions , constants
+
+## Atlas settings
+
+for this project we are using MERN1 project in atlas

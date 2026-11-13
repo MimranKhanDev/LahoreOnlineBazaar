@@ -1,21 +1,4 @@
-// src/components/Product/Search.jsx
-
-/**
- * 🔍 SEARCH - Product search page
- *
- * This component provides:
- * 1. Search input with clear button
- * 2. Popular search suggestions
- * 3. Redirect to products page with keyword
- * 4. Clean, modern UI with animations
- *
- * 📦 Packages Used:
- * - framer-motion: v9+ (animations)
- * - react-hot-toast: v2+ (toast notifications)
- * - react-icons: v4+ (icons)
- */
-
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaSearch, FaTimes, FaArrowRight } from "react-icons/fa";
@@ -26,29 +9,16 @@ const Search = () => {
   // 🎯 State - Track what user types
   const [keyword, setKeyword] = useState("");
   const navigate = useNavigate();
-
-  /**
-   * 🔄 Handle search submission
-   * - If keyword exists: Navigate to products with keyword
-   * - If empty: Navigate to all products
-   */
   const searchSubmitHandler = (e) => {
-    e.preventDefault(); // Prevent page refresh
-
+    e.preventDefault();
     if (keyword.trim()) {
-      // Navigate to products page with search keyword
       navigate(`/products/${keyword.trim()}`);
       toast.success(`Searching for "${keyword.trim()}"`);
     } else {
-      // If empty, go to all products
       navigate("/products");
       toast.info("Showing all products");
     }
   };
-
-  /**
-   * 🧹 Clear search input
-   */
   const clearSearch = () => {
     setKeyword("");
   };

@@ -18,7 +18,7 @@
  * - orderSlice: getMyOrders, clearOrderErrors
  */
 
-import React, { Fragment, useEffect } from "react";
+import { Fragment, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -114,7 +114,7 @@ const MyOrders = () => {
       flex: 0.5,
       renderCell: (params) => (
         <span className="font-semibold text-red-500">
-          ₹{params.value?.toFixed(2)}
+          ${params.value?.toFixed(2)}
         </span>
       ),
     },
@@ -141,7 +141,7 @@ const MyOrders = () => {
       sortable: false,
       renderCell: (params) => (
         <Link
-          to={`/order/${params.getValue(params.id, "id")}`}
+          to={`/order/${params.row.id}`}
           className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-all"
         >
           <FaEye className="text-sm" />
@@ -163,13 +163,15 @@ const MyOrders = () => {
       createdAt: order.createdAt || new Date(),
     })) || [];
 
+  useEffect(() => {
+    dispatch(getMyOrders());
+  }, [dispatch]);
   // 🔄 Effects
   useEffect(() => {
     if (error) {
       toast.error(error);
       dispatch(clearOrderErrors());
     }
-    dispatch(getMyOrders());
   }, [dispatch, error]);
 
   return (

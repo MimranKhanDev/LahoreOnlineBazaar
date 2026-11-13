@@ -1,22 +1,3 @@
-// src/components/User/LoginSignUp.jsx
-
-/**
- * 🔐 LOGIN / SIGNUP - User authentication page
- *
- * Features:
- * 1. Login form with email/password
- * 2. Register form with name/email/password/avatar
- * 3. Tab switching between login and register
- * 4. Form validation
- * 5. Avatar upload preview
- * 6. Redirect after successful authentication
- *
- * 📦 Packages Used:
- * - @mui/icons-material: v5+
- * - react-hot-toast: v2+
- * - framer-motion: v9+
- */
-
 import React, { Fragment, useRef, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation, Link } from "react-router-dom";
@@ -71,6 +52,7 @@ const LoginSignUp = () => {
     password: "",
   });
   const { name, email, password } = user;
+  const [confirmPassword, setConfirmPassword] = useState(""); // ✅ Added state
 
   const [avatar, setAvatar] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState("/Profile.png");
@@ -78,45 +60,22 @@ const LoginSignUp = () => {
   // 🎯 Get redirect URL from query params
   const redirect = location.search ? location.search.split("=")[1] : "/account";
 
-  /**
-   * 👤 Handle login form submission
-   */
   const loginSubmit = (e) => {
     e.preventDefault();
     dispatch(loginUser({ email: loginEmail, password: loginPassword }));
   };
-
-  /**
-   * 📝 Handle register form submission
-   */
   const registerSubmit = (e) => {
     e.preventDefault();
-
-    // Validate password match
-    if (password !== document.getElementById("confirmPassword")?.value) {
+    if (password !== confirmPassword) {
       toast.error("Passwords do not match");
       return;
     }
-
-    // OLD CODE — BUGGY: FormData requires multipart middleware, but the backend only parses JSON.
-    // const formData = new FormData();
-    // formData.append("name", name);
-    // formData.append("email", email);
-    // formData.append("password", password);
-    // if (avatar) formData.append("avatar", avatar);
-    // dispatch(registerUser(formData));
-
-    // NEW CODE — FIX: send JSON; the selected image preview is already a data URI for Cloudinary.
     const registerData = { name, email, password };
     if (avatarPreview.startsWith("data:")) {
       registerData.avatar = avatarPreview;
     }
     dispatch(registerUser(registerData));
   };
-
-  /**
-   * 📝 Handle register form data changes
-   */
   const registerDataChange = (e) => {
     if (e.target.name === "avatar") {
       const file = e.target.files[0];
@@ -134,10 +93,6 @@ const LoginSignUp = () => {
       setUser({ ...user, [e.target.name]: e.target.value });
     }
   };
-
-  /**
-   * 🔄 Switch between login and register tabs
-   */
   const switchTabs = (tab) => {
     if (tab === "login") {
       switcherTab.current.classList.add("shiftToNeutral");
@@ -152,14 +107,11 @@ const LoginSignUp = () => {
       loginTab.current.classList.add("shiftToLeft");
     }
   };
-
-  // 🔄 Effects
   useEffect(() => {
     if (error) {
       toast.error(error);
       dispatch(clearErrors());
     }
-
     if (isAuthenticated) {
       navigate(redirect);
       toast.success("Welcome back! 👋");
@@ -169,7 +121,6 @@ const LoginSignUp = () => {
   return (
     <Fragment>
       <MetaData title="Login | ECOMMERCE" />
-
       {loading ? (
         <Loader />
       ) : (
@@ -181,15 +132,12 @@ const LoginSignUp = () => {
             className="w-full max-w-md"
           >
             <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
-              {/* 🏷️ Header */}
               <div className="text-center pt-8 pb-4">
                 <h1 className="text-3xl font-bold text-red-500">Welcome</h1>
                 <p className="text-gray-500 text-sm">
                   Sign in to continue shopping
                 </p>
               </div>
-
-              {/* 📑 Tab Switcher */}
               <div className="relative">
                 <div className="flex rounded-full mx-6 bg-gray-100 p-1">
                   <button
@@ -210,8 +158,6 @@ const LoginSignUp = () => {
                   ></div>
                 </div>
               </div>
-
-              {/* 📝 Login Form */}
               <div ref={loginTab} className="p-6 transition-all duration-500">
                 <form onSubmit={loginSubmit} className="space-y-4">
                   <div className="relative">
@@ -273,11 +219,9 @@ const LoginSignUp = () => {
                   </motion.button>
                 </form>
               </div>
-
-              {/* 📝 Register Form */}
               <div
                 ref={registerTab}
-                className="p-6 transition-all duration-500 transform translate-y-[-100%] translate-x-[-100vw]"
+                className="p-6 transition-all duration-500 transform translate-y-[-100%] translate-x-[-100vw] shiftToLeft"
               >
                 <form
                   onSubmit={registerSubmit}
@@ -329,7 +273,8 @@ const LoginSignUp = () => {
                       type="password"
                       placeholder="Confirm Password"
                       required
-                      id="confirmPassword"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
                       className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-red-500 transition-colors"
                     />
                   </div>

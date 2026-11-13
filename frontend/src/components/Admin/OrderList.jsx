@@ -18,7 +18,7 @@
  * - orderSlice: getAllOrders, deleteOrder, clearOrderErrors
  */
 
-import React, { Fragment, useEffect } from "react";
+import { Fragment, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -33,6 +33,7 @@ import {
   getAllOrders,
   deleteOrder,
   clearOrderErrors,
+  clearOrderStatus,
   selectAllOrders,
   selectAllOrdersLoading,
   selectAllOrdersError,
@@ -139,7 +140,7 @@ const OrderList = () => {
       flex: 0.4,
       renderCell: (params) => (
         <span className="font-semibold text-red-500">
-          ₹{params.value?.toFixed(2)}
+          ${params.value?.toFixed(2)}
         </span>
       ),
     },
@@ -158,13 +159,13 @@ const OrderList = () => {
       renderCell: (params) => (
         <div className="flex items-center gap-2">
           <Link
-            to={`/admin/order/${params.getValue(params.id, "id")}`}
+            to={`/admin/order/${params.row.id}`}
             className="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-all"
           >
             <Edit fontSize="small" />
           </Link>
           <button
-            onClick={() => deleteOrderHandler(params.getValue(params.id, "id"))}
+            onClick={() => deleteOrderHandler(params.row.id)}
             className="p-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-all"
           >
             <Delete fontSize="small" />
@@ -186,7 +187,12 @@ const OrderList = () => {
       user: item.user?.name || "Unknown",
     })) || [];
 
-  // 🔄 Effects
+  // 🔄 Fetch orders on mount
+  useEffect(() => {
+    dispatch(getAllOrders());
+  }, [dispatch]);
+
+  // 🔄 Handle Errors and Deletion Success
   useEffect(() => {
     if (error) {
       toast.error(error);
@@ -195,10 +201,9 @@ const OrderList = () => {
 
     if (isDeleted) {
       toast.success("Order deleted successfully! 🎉");
-      dispatch(getAllOrders());
+      dispatch(clearOrderStatus()); // ✅ Reset the flag
+      dispatch(getAllOrders()); // Refresh table
     }
-
-    dispatch(getAllOrders());
   }, [dispatch, error, isDeleted]);
 
   if (loading) return <Loader />;

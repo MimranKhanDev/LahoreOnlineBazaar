@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "start": "node backend/app.js",
-    "dev": "nodemon backend/app.js",
-    "prod": "nodemon backend/app.js",
+    "dev": "cross-env NODE_ENV=DEVELOPMENT nodemon backend/app.js",
+    "prod": "cross-env NODE_ENV=PRODUCTION nodemon backend/app.js",
     "seed": "node backend/seeder/seeder.js"
   },
   "repository": {
@@ -23,7 +23,6 @@
   "homepage": "https://github.com/MimranKhanDev/LahoreOnlineBazaar#readme",
   "dependencies": {
     "bcryptjs": "^3.0.3",
-    "body-parser": "^2.3.0",
     "cloudinary": "^2.10.0",
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.4.2",
@@ -32,9 +31,11 @@
     "mongodb": "^7.5.0",
     "mongoose": "^9.9.2",
     "nodemailer": "^9.0.5",
-    "nodemon": "^3.1.14",
     "stripe": "^22.5.0",
-    "tailwindcss": "^4.3.3",
     "validator": "^13.15.35"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0",
+    "nodemon": "^3.1.14"
   }
 }

@@ -1,24 +1,4 @@
-// src/components/Admin/ProductList.jsx
-
-/**
- * 📋 PRODUCT LIST - Admin product management
- *
- * Features:
- * 1. Data grid with all products
- * 2. Edit product link
- * 3. Delete product action
- * 4. Stock status indicators
- *
- * 📦 Packages Used:
- * - @mui/x-data-grid: v6+ (modern data grid)
- * - react-hot-toast: v2+ (toast notifications)
- * - framer-motion: v9+ (animations)
- *
- * 🔄 Redux Toolkit:
- * - productSlice: getAdminProducts, deleteProduct, clearErrors
- */
-
-import React, { Fragment, useEffect } from "react";
+import { Fragment, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -33,6 +13,7 @@ import {
   getAdminProducts,
   deleteProduct,
   clearErrors,
+  clearProductStatus,
   selectAdminProducts,
   selectAdminLoading,
   selectAdminError,
@@ -92,7 +73,7 @@ const ProductList = () => {
       minWidth: 150,
       flex: 0.4,
       renderCell: (params) => (
-        <span className="font-semibold text-red-500">₹{params.value}</span>
+        <span className="font-semibold text-red-500">${params.value}</span> // ✅ Fixed Currency
       ),
     },
     {
@@ -135,15 +116,13 @@ const ProductList = () => {
       renderCell: (params) => (
         <div className="flex items-center gap-2">
           <Link
-            to={`/admin/product/${params.getValue(params.id, "id")}`}
+            to={`/admin/product/${params.row.id}`} // ✅ Fixed MUI
             className="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-all"
           >
             <Edit fontSize="small" />
           </Link>
           <button
-            onClick={() =>
-              deleteProductHandler(params.getValue(params.id, "id"))
-            }
+            onClick={() => deleteProductHandler(params.row.id)} // ✅ Fixed MUI
             className="p-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-all"
           >
             <Delete fontSize="small" />
@@ -167,18 +146,20 @@ const ProductList = () => {
 
   // 🔄 Effects
   useEffect(() => {
+    dispatch(getAdminProducts());
+  }, [dispatch]);
+
+  useEffect(() => {
     if (error) {
       toast.error(error);
       dispatch(clearErrors());
     }
-
     if (isDeleted) {
       toast.success("Product deleted successfully! 🎉");
+      dispatch(clearProductStatus());
       // Refresh products list
       dispatch(getAdminProducts());
     }
-
-    dispatch(getAdminProducts());
   }, [dispatch, error, isDeleted]);
 
   if (loading) return <Loader />;

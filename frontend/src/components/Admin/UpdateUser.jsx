@@ -12,7 +12,7 @@
  * - userSlice: getUserDetails, updateUser, clearErrors
  */
 
-import React, { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -33,6 +33,7 @@ import {
   getUserDetails,
   updateUser,
   clearErrors,
+  clearMessages,
   selectUser,
   selectUserLoading,
   selectUserError,
@@ -71,7 +72,26 @@ const UpdateUser = () => {
     dispatch(updateUser({ id, userData: { name, email, role } }));
   };
 
-  // 🔄 Effects
+  /*   // 🔄 Effects
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+      dispatch(clearErrors());}
+    if (isUpdated) {
+      toast.success("User updated successfully! 🎉");
+      navigate("/admin/users");}
+    if (id) {
+      dispatch(getUserDetails(id));}
+  }, [dispatch, id, error, isUpdated, navigate]); */
+
+  // 🔄 Fetch user details on mount
+  useEffect(() => {
+    if (id) {
+      dispatch(getUserDetails(id));
+    }
+  }, [dispatch, id]);
+
+  // 🔄 Handle Errors and Update Success
   useEffect(() => {
     if (error) {
       toast.error(error);
@@ -80,13 +100,10 @@ const UpdateUser = () => {
 
     if (isUpdated) {
       toast.success("User updated successfully! 🎉");
+      dispatch(clearMessages()); // ✅ Reset the flag to prevent toast spam
       navigate("/admin/users");
     }
-
-    if (id) {
-      dispatch(getUserDetails(id));
-    }
-  }, [dispatch, id, error, isUpdated, navigate]);
+  }, [dispatch, error, isUpdated, navigate]);
 
   // Populate form when user loads
   useEffect(() => {

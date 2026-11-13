@@ -1,6 +1,3 @@
-// src/components/layout/MetaData.jsx
-
-import React from "react";
 import { Helmet } from "react-helmet-async";
 
 const MetaData = ({ title, description, keywords, image, url }) => {

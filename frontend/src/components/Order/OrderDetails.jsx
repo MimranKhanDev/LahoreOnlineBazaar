@@ -20,7 +20,7 @@
  * - orderSlice: getOrderDetails, clearOrderErrors
  */
 
-import React, { Fragment, useEffect } from "react";
+import { Fragment, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -116,17 +116,22 @@ const OrderDetails = () => {
    */
   const formatAddress = (shippingInfo) => {
     if (!shippingInfo) return "N/A";
-    return `${shippingInfo.address || ""}, ${shippingInfo.city || ""}, ${shippingInfo.state || ""}, ${shippingInfo.pinCode || ""}, ${shippingInfo.country || ""}`;
+    return `${shippingInfo.address || ""}, ${shippingInfo.city || ""}, ${
+      shippingInfo.state || ""
+    }, ${shippingInfo.pinCode || ""}, ${shippingInfo.country || ""}`;
   };
 
+  // 🔄 Fetch Order Details on mount
+  useEffect(() => {
+    dispatch(getOrderDetails(id));
+  }, [dispatch, id]);
   // 🔄 Effects
   useEffect(() => {
     if (error) {
       toast.error(error);
       dispatch(clearOrderErrors());
     }
-    dispatch(getOrderDetails(id));
-  }, [dispatch, id, error]);
+  }, [dispatch, error]);
 
   // ⏳ Loading state
   if (loading) return <Loader />;
@@ -205,7 +210,7 @@ const OrderDetails = () => {
               <div className="text-right">
                 <p className="text-sm text-gray-500">Total Amount</p>
                 <p className="text-2xl font-bold text-red-500">
-                  ₹{order.totalPrice?.toFixed(2)}
+                  ${order.totalPrice?.toFixed(2)}
                 </p>
               </div>
             </div>
@@ -286,7 +291,7 @@ const OrderDetails = () => {
                   <div>
                     <p className="text-sm text-gray-500">Amount Paid</p>
                     <p className="text-lg font-semibold text-red-500">
-                      ₹{order.totalPrice?.toFixed(2)}
+                      ${order.totalPrice?.toFixed(2)}
                     </p>
                   </div>
                 </div>
@@ -311,9 +316,12 @@ const OrderDetails = () => {
                       className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl"
                     >
                       <img
-                        src={item.image}
+                        src={item.image || "/placeholder.jpg"}
                         alt={item.name}
                         className="w-20 h-20 object-cover rounded-lg"
+                        onError={(e) => {
+                          e.target.src = "/placeholder.jpg";
+                        }}
                       />
                       <div className="flex-1 min-w-0">
                         <Link
@@ -323,11 +331,11 @@ const OrderDetails = () => {
                           {item.name}
                         </Link>
                         <p className="text-sm text-gray-500">
-                          {item.quantity} × ₹{item.price}
+                          {item.quantity} × ${item.price}
                         </p>
                       </div>
                       <p className="font-semibold text-red-500">
-                        ₹{(item.quantity * item.price).toFixed(2)}
+                        ${(item.quantity * item.price).toFixed(2)}
                       </p>
                     </div>
                   ))}
@@ -350,7 +358,7 @@ const OrderDetails = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between text-gray-600">
                     <span>Subtotal</span>
-                    <span>₹{subtotal?.toFixed(2)}</span>
+                    <span>${subtotal?.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-gray-600">
                     <span>Shipping</span>
@@ -361,17 +369,17 @@ const OrderDetails = () => {
                     >
                       {order.shippingPrice === 0
                         ? "Free"
-                        : `₹${order.shippingPrice?.toFixed(2)}`}
+                        : `$${order.shippingPrice?.toFixed(2)}`}
                     </span>
                   </div>
                   <div className="flex justify-between text-gray-600 border-b pb-3">
                     <span>Tax (18% GST)</span>
-                    <span>₹{order.taxPrice?.toFixed(2)}</span>
+                    <span>${order.taxPrice?.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-xl font-bold pt-2">
                     <span>Total</span>
                     <span className="text-red-500">
-                      ₹{order.totalPrice?.toFixed(2)}
+                      ${order.totalPrice?.toFixed(2)}
                     </span>
                   </div>
                 </div>
@@ -387,10 +395,10 @@ const OrderDetails = () => {
                         order.orderStatus === "Delivered"
                           ? "bg-green-500"
                           : order.orderStatus === "Processing"
-                            ? "bg-yellow-500"
-                            : order.orderStatus === "Shipped"
-                              ? "bg-blue-500"
-                              : "bg-red-500"
+                          ? "bg-yellow-500"
+                          : order.orderStatus === "Shipped"
+                          ? "bg-blue-500"
+                          : "bg-red-500"
                       }`}
                     />
                     <span className="font-medium capitalize">

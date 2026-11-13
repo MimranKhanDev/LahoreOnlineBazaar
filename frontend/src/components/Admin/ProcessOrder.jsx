@@ -1,18 +1,4 @@
-// src/components/Admin/ProcessOrder.jsx
-
-/**
- * ⚙️ PROCESS ORDER - Update order status
- *
- * Features:
- * 1. Display order details
- * 2. Update order status dropdown
- * 3. Process button
- *
- * 🔄 Redux Toolkit:
- * - orderSlice: getOrderDetails, updateOrderStatus, clearOrderErrors
- */
-
-import React, { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -40,6 +26,7 @@ import {
   getOrderDetails,
   updateOrderStatus,
   clearOrderErrors,
+  clearOrderStatus,
   selectOrderDetails,
   selectOrderDetailsLoading,
   selectOrderDetailsError,
@@ -94,10 +81,19 @@ const ProcessOrder = () => {
    */
   const formatAddress = (shippingInfo) => {
     if (!shippingInfo) return "N/A";
-    return `${shippingInfo.address || ""}, ${shippingInfo.city || ""}, ${shippingInfo.state || ""}, ${shippingInfo.pinCode || ""}, ${shippingInfo.country || ""}`;
+    return `${shippingInfo.address || ""}, ${shippingInfo.city || ""}, ${
+      shippingInfo.state || ""
+    }, ${shippingInfo.pinCode || ""}, ${shippingInfo.country || ""}`;
   };
 
-  // 🔄 Effects
+  // 🔄 Fetch order on mount
+  useEffect(() => {
+    if (id) {
+      dispatch(getOrderDetails(id));
+    }
+  }, [dispatch, id]);
+
+  // 🔄 Handle Errors and Update Success
   useEffect(() => {
     if (error) {
       toast.error(error);
@@ -106,13 +102,10 @@ const ProcessOrder = () => {
 
     if (isUpdated) {
       toast.success("Order status updated successfully! 🎉");
+      dispatch(clearOrderStatus()); // ✅ Reset the flag
       navigate("/admin/orders");
     }
-
-    if (id) {
-      dispatch(getOrderDetails(id));
-    }
-  }, [dispatch, id, error, isUpdated, navigate]);
+  }, [dispatch, error, isUpdated, navigate]);
 
   // Set status when order loads
   useEffect(() => {
@@ -259,7 +252,7 @@ const ProcessOrder = () => {
                     <div>
                       <p className="text-sm text-gray-500">Amount</p>
                       <p className="text-lg font-semibold text-red-500">
-                        ₹{order.totalPrice?.toFixed(2)}
+                        ${order.totalPrice?.toFixed(2)}
                       </p>
                     </div>
                   </div>
@@ -283,9 +276,12 @@ const ProcessOrder = () => {
                         className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl"
                       >
                         <img
-                          src={item.image}
+                          src={item.image || "/placeholder.jpg"}
                           alt={item.name}
                           className="w-16 h-16 object-cover rounded-lg"
+                          onError={(e) => {
+                            e.target.src = "/placeholder.jpg";
+                          }}
                         />
                         <div className="flex-1 min-w-0">
                           <Link
@@ -295,11 +291,11 @@ const ProcessOrder = () => {
                             {item.name}
                           </Link>
                           <p className="text-sm text-gray-500">
-                            {item.quantity} × ₹{item.price}
+                            {item.quantity} × ${item.price}
                           </p>
                         </div>
                         <p className="font-semibold text-red-500">
-                          ₹{(item.quantity * item.price).toFixed(2)}
+                          ${(item.quantity * item.price).toFixed(2)}
                         </p>
                       </div>
                     ))}

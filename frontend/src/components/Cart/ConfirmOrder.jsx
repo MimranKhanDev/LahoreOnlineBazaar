@@ -15,7 +15,7 @@
  * - react-router-dom: v6 (navigation)
  */
 
-import React, { Fragment } from "react";
+import { Fragment, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -38,6 +38,14 @@ const ConfirmOrder = () => {
   const cartItems = useSelector(selectCartItems);
   const shippingInfo = useSelector(selectShippingInfo);
   const user = useSelector(selectUser);
+  // 🛡️ SECURITY GUARD: Prevent direct access without cart or shipping info
+  useEffect(() => {
+    if (cartItems.length === 0) {
+      navigate("/cart");
+    } else if (!shippingInfo || !shippingInfo.address) {
+      navigate("/shipping");
+    }
+  }, [cartItems, shippingInfo, navigate]);
 
   // 💰 Calculate totals
   const subtotal = cartItems.reduce(
@@ -49,7 +57,11 @@ const ConfirmOrder = () => {
   const totalPrice = subtotal + tax + shippingCharges;
 
   // 📍 Format address
-  const address = `${shippingInfo?.address || ""}, ${shippingInfo?.city || ""}, ${shippingInfo?.state || ""}, ${shippingInfo?.pinCode || ""}, ${shippingInfo?.country || ""}`;
+  const address = `${shippingInfo?.address || ""}, ${
+    shippingInfo?.city || ""
+  }, ${shippingInfo?.state || ""}, ${shippingInfo?.pinCode || ""}, ${
+    shippingInfo?.country || ""
+  }`;
 
   /**
    * ✅ Proceed to payment
@@ -125,20 +137,23 @@ const ConfirmOrder = () => {
                       className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl"
                     >
                       <img
-                        src={item.image}
+                        src={item.image || "/placeholder.jpg"}
                         alt={item.name}
                         className="w-16 h-16 object-cover rounded-lg"
+                        onError={(e) => {
+                          e.target.src = "/placeholder.jpg";
+                        }}
                       />
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-gray-800 truncate">
                           {item.name}
                         </p>
                         <p className="text-sm text-gray-500">
-                          {item.quantity} × ₹{item.price}
+                          {item.quantity} × ${item.price}
                         </p>
                       </div>
                       <p className="font-semibold text-red-500">
-                        ₹{(item.quantity * item.price).toFixed(2)}
+                        ${(item.quantity * item.price).toFixed(2)}
                       </p>
                     </div>
                   ))}
@@ -161,7 +176,7 @@ const ConfirmOrder = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between text-gray-600">
                     <span>Subtotal</span>
-                    <span>₹{subtotal.toFixed(2)}</span>
+                    <span>${subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-gray-600">
                     <span>Shipping</span>
@@ -170,17 +185,17 @@ const ConfirmOrder = () => {
                     >
                       {shippingCharges === 0
                         ? "Free"
-                        : `₹${shippingCharges.toFixed(2)}`}
+                        : `$${shippingCharges.toFixed(2)}`}
                     </span>
                   </div>
                   <div className="flex justify-between text-gray-600 border-b pb-3">
                     <span>Tax (18% GST)</span>
-                    <span>₹{tax.toFixed(2)}</span>
+                    <span>${tax.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-xl font-bold pt-2">
                     <span>Total</span>
                     <span className="text-red-500">
-                      ₹{totalPrice.toFixed(2)}
+                      ${totalPrice.toFixed(2)}
                     </span>
                   </div>
                 </div>

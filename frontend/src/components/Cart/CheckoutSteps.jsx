@@ -13,7 +13,6 @@
  * - @mui/icons-material: v5+ (icons)
  */
 
-import React from "react";
 import { Stepper, Step, StepLabel, Box } from "@mui/material";
 import {
   LocalShipping,

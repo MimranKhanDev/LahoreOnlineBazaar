@@ -18,7 +18,7 @@
  * - productSlice: getProductReviews, deleteReview, clearErrors
  */
 
-import React, { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
@@ -32,6 +32,7 @@ import {
   getProductReviews,
   deleteReview,
   clearErrors,
+  clearProductStatus,
 } from "../../features/products/productSlice";
 
 import Sidebar from "./Sidebar";
@@ -110,7 +111,9 @@ const ProductReviews = () => {
               className={`${rating >= 3 ? "text-yellow-400" : "text-gray-300"}`}
             />
             <span
-              className={`font-bold ${rating >= 3 ? "text-green-600" : "text-red-500"}`}
+              className={`font-bold ${
+                rating >= 3 ? "text-green-600" : "text-red-500"
+              }`}
             >
               {rating}
             </span>
@@ -135,7 +138,8 @@ const ProductReviews = () => {
       sortable: false,
       renderCell: (params) => (
         <button
-          onClick={() => deleteReviewHandler(params.getValue(params.id, "id"))}
+          // onClick={() => deleteReviewHandler(params.getValue(params.id, "id"))}
+          onClick={() => deleteReviewHandler(params.row.id)}
           className="p-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-all"
         >
           <Delete fontSize="small" />
@@ -155,6 +159,17 @@ const ProductReviews = () => {
       user: item.name || "Anonymous",
     })) || [];
 
+  /*   // 🔄 Effects
+  useEffect(() => {
+    if (reviewsError) {
+      toast.error(reviewsError);
+      dispatch(clearErrors());}
+    if (reviewDeleted) {
+      toast.success("Review deleted successfully! 🎉");
+      if (productId) {
+        dispatch(getProductReviews(productId));}}
+  }, [dispatch, reviewsError, reviewDeleted, productId]); */
+
   // 🔄 Effects
   useEffect(() => {
     if (reviewsError) {
@@ -164,6 +179,7 @@ const ProductReviews = () => {
 
     if (reviewDeleted) {
       toast.success("Review deleted successfully! 🎉");
+      dispatch(clearProductStatus()); // ✅ Reset the flag
       if (productId) {
         dispatch(getProductReviews(productId));
       }

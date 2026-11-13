@@ -1,50 +1,27 @@
-// src/components/User/ForgotPassword.jsx
-
-/**
- * 🔑 FORGOT PASSWORD - Password reset request
- *
- * Features:
- * 1. Email input
- * 2. Send reset link
- * 3. Success/error messages
- *
- * 📦 Packages Used:
- * - @mui/icons-material: v5+
- * - react-hot-toast: v2+
- * - framer-motion: v9+
- */
-
-import React, { Fragment, useState, useEffect } from "react";
+import { Fragment, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
+import { Link } from "react-router-dom";
 import { MailOutline } from "@mui/icons-material";
 import { CircularProgress } from "@mui/material";
-
-// ✅ Redux Toolkit imports
 import {
   forgotPassword,
   clearErrors,
+  clearMessages,
   selectUserLoading,
   selectUserError,
 } from "../../features/user/userSlice";
-
 import Loader from "../layout/Loader/Loader";
 import MetaData from "../layout/MetaData";
 
 const ForgotPassword = () => {
   const dispatch = useDispatch();
-
-  // 📊 Redux state
   const loading = useSelector(selectUserLoading);
   const error = useSelector(selectUserError);
   const { message } = useSelector((state) => state.user);
-
   const [email, setEmail] = useState("");
 
-  /**
-   * 📧 Handle form submission
-   */
   const forgotPasswordSubmit = (e) => {
     e.preventDefault();
     if (!email) {
@@ -54,16 +31,15 @@ const ForgotPassword = () => {
     dispatch(forgotPassword(email));
   };
 
-  // 🔄 Effects
   useEffect(() => {
     if (error) {
       toast.error(error);
       dispatch(clearErrors());
     }
-
     if (message) {
       toast.success(message);
-      setEmail(""); // Clear email field on success
+      setEmail("");
+      dispatch(clearMessages());
     }
   }, [dispatch, error, message]);
 
@@ -126,12 +102,12 @@ const ForgotPassword = () => {
 
               {/* 🔄 Back to Login */}
               <div className="mt-6 text-center">
-                <a
-                  href="/login"
+                <Link
+                  to="/login"
                   className="text-sm text-red-500 hover:text-red-600 transition-colors"
                 >
                   ← Back to Login
-                </a>
+                </Link>
               </div>
             </div>
           </motion.div>

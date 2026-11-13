@@ -17,7 +17,7 @@
  * - productSlice: createProduct, clearErrors
  */
 
-import React, { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -87,9 +87,6 @@ const NewProduct = () => {
    */
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-
-    setImages([]);
-    setImagesPreview([]);
 
     files.forEach((file) => {
       const reader = new FileReader();
@@ -211,7 +208,7 @@ const NewProduct = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <TextField
                     fullWidth
-                    label="Price (₹)"
+                    label="Price ($)"
                     type="number"
                     variant="outlined"
                     value={price}

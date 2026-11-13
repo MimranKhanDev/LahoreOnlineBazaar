@@ -15,7 +15,7 @@
  * - @mui/icons-material: v5+ (icons)
  */
 
-import React, { Fragment, useState } from "react";
+import { Fragment, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -73,8 +73,20 @@ const Shipping = () => {
     }
 
     // 💾 Save shipping info to Redux
+    // We find the actual names so the database and admin dashboard look nice
+    const countryName = Country.getCountryByCode(country)?.name || country;
+    const stateName =
+      State.getStateByCodeAndCountry(state, country)?.name || state;
+
     dispatch(
-      saveShippingInfo({ address, city, state, country, pinCode, phoneNo }),
+      saveShippingInfo({
+        address,
+        city,
+        state: stateName,
+        country: countryName,
+        pinCode: Number(pinCode),
+        phoneNo: Number(phoneNo),
+      }),
     );
     toast.success("Shipping details saved!");
     navigate("/order/confirm");
@@ -174,11 +186,12 @@ const Shipping = () => {
                   className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-red-500 transition-colors appearance-none bg-white"
                 >
                   <option value="">Select Country</option>
-                  {Country.getAllCountries().map((item) => (
-                    <option key={item.isoCode} value={item.isoCode}>
-                      {item.name}
-                    </option>
-                  ))}
+                  {Country &&
+                    state.getAllCountries(country).map((item) => (
+                      <option key={item.isoCode} value={item.isoCode}>
+                        {item.name}
+                      </option>
+                    ))}
                 </select>
               </div>
 
@@ -197,7 +210,7 @@ const Shipping = () => {
                   <option value="">Select State</option>
                   {country &&
                     State.getStatesOfCountry(country).map((item) => (
-                      <option key={item.isoCode} value={item.isoCode}>
+                      <option key={item.isoCode} value={item.name}>
                         {item.name}
                       </option>
                     ))}

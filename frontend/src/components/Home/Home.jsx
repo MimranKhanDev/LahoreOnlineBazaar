@@ -1,5 +1,4 @@
-// src/components/pages/Home/Home.jsx
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import toast from "react-hot-toast"; // 🆕 Modern toast
 import { motion } from "framer-motion"; // 🆕 For animations
