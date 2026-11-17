@@ -112,7 +112,6 @@ export const deleteOrder = catchAsyncErrors(async (req, res, next) => {
 });
 
 export const getSales = catchAsyncErrors(async (req, res, next) => {
-  // ✅ FIXED: Default to last 30 days if no dates are provided
   const startDate = new Date(
     req.query.startDate || Date.now() - 30 * 24 * 60 * 60 * 1000,
   );

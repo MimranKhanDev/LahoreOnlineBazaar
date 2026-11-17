@@ -5,11 +5,10 @@ import { FaCalendarAlt, FaCheckCircle } from "react-icons/fa";
 import profilePng from "../../images/profile.jpg";
 
 const ReviewCard = ({ review }) => {
-  // ⭐ Rating options for MUI Rating component
   const ratingOptions = {
     value: review.rating || 0,
     readOnly: true,
-    precision: 0.5, // Allow half stars
+    precision: 0.5,
     size: "small",
   };
   const formatDate = (dateString) => {

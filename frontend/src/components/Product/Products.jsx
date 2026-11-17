@@ -32,11 +32,9 @@ const Products = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [category, setCategory] = useState("");
 
-  // ✅ FIXED: Visual states (for smooth dragging)
   const [price, setPrice] = useState([0, 200000]);
   const [ratings, setRatings] = useState(0);
 
-  // ✅ FIXED: Filter states (triggers API only when mouse is released)
   const [filterPrice, setFilterPrice] = useState([0, 200000]);
   const [filterRatings, setFilterRatings] = useState(0);
 
@@ -63,12 +61,10 @@ const Products = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // ✅ FIXED: Only updates visual state
   const handlePriceChange = (event, newPrice) => {
     setPrice(newPrice);
   };
 
-  // ✅ FIXED: Only updates visual state
   const handleRatingsChange = (event, newRating) => {
     setRatings(newRating);
   };
@@ -94,7 +90,6 @@ const Products = () => {
     }
   }, [dispatch, error]);
 
-  // ✅ FIXED: Uses filterPrice and filterRatings
   useEffect(() => {
     dispatch(
       getProducts({
@@ -153,7 +148,7 @@ const Products = () => {
                       value={price}
                       onChange={handlePriceChange}
                       onChangeCommitted={(e, val) => {
-                        setFilterPrice(val); // ✅ FIXED: Only updates API state on mouse release
+                        setFilterPrice(val);
                         setCurrentPage(1);
                       }}
                       disableSwap
@@ -206,7 +201,7 @@ const Products = () => {
                         value={ratings}
                         onChange={handleRatingsChange}
                         onChangeCommitted={(e, val) => {
-                          setFilterRatings(val); // ✅ FIXED: Only updates API state on mouse release
+                          setFilterRatings(val);
                           setCurrentPage(1);
                         }}
                         disableSwap

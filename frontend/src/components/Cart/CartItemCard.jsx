@@ -1,20 +1,3 @@
-// src/components/Cart/CartItemCard.jsx
-
-/**
- * 🏷️ CART ITEM CARD - Individual cart item display
- *
- * Features:
- * 1. Product image
- * 2. Product name (link to product page)
- * 3. Price display
- * 4. Quantity controls (increase/decrease)
- * 5. Remove button
- *
- * 📦 Packages Used:
- * - framer-motion: v9+ (animations)
- * - react-icons: v4+ (icons)
- */
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";

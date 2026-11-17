@@ -1,25 +1,3 @@
-// src/components/Cart/Cart.jsx
-
-/**
- * 🛒 CART - Shopping cart page
- *
- * Features:
- * 1. Display cart items with image, name, price
- * 2. Quantity adjustment (increase/decrease)
- * 3. Remove items from cart
- * 4. Subtotal calculation
- * 5. Checkout button
- * 6. Empty cart state
- *
- * 📦 Packages Used:
- * - react-hot-toast: v2+ (toast notifications)
- * - framer-motion: v9+ (animations)
- * - react-router-dom: v6 (navigation)
- *
- * 🔄 Redux Toolkit:
- * - cartSlice: addToCart, removeFromCart
- */
-
 import { Fragment } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";

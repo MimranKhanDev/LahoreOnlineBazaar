@@ -47,7 +47,6 @@ const Sidebar = () => {
       initial={{ x: -280 }}
       animate={{ x: 0 }}
       transition={{ duration: 0.3 }}
-      // ✅ FIXED: Pushed down exactly below the 80px header
       className="fixed left-0 top-[80px] h-[calc(100vh-80px)] w-64 bg-white border-r border-gray-200 shadow-sm z-40 flex flex-col justify-between"
     >
       <div className="overflow-y-auto">

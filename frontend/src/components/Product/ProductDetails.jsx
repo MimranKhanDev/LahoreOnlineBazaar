@@ -225,43 +225,8 @@ const ProductDetails = () => {
               className="space-y-4"
             >
               <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
-                {/*                 <Carousel
-                  animation="slide"
-                  indicators={true}
-                  timeout={500}
-                  navButtonsAlwaysVisible={true}
-                  navButtonsProps={{
-                    style: {
-                      background: "rgba(239, 68, 68, 0.8)",
-                      color: "white",
-                      borderRadius: "50%",
-                      padding: "10px",
-                      margin: "0 10px",
-                    },
-                  }}
-                  indicatorContainerProps={{ style: { marginTop: "10px" } }}
-                  indicatorIconButtonProps={{ style: { color: "#d1d5db" } }}
-                  activeIndicatorIconButtonProps={{
-                    style: { color: "#ef4444" },
-                  }}
-                >
-                  {product.images?.map((item, i) => (
-                    <motion.img
-                      key={i}
-                      src={item.url || "/placeholder.jpg"}
-                      alt={`${product.name} - ${i + 1}`}
-                      className="w-full h-[400px] md:h-[500px] object-contain p-4"
-                      whileHover={{ scale: 1.02 }}
-                      transition={{ duration: 0.3 }}
-                      onError={(e) => {
-                        e.target.src = "/placeholder.jpg";
-                      }}
-                    />
-                  ))}
-                </Carousel>*/}
                 <div className="w-full h-[400px] md:h-[500px] flex items-center justify-center p-4">
                   <img
-                    // ✅ FIXED: Use activeImage state to show the clicked thumbnail
                     src={
                       product.images?.[activeImage]?.url || "/placeholder.jpg"
                     }

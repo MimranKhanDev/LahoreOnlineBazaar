@@ -300,7 +300,7 @@ const Header = () => {
           )}
         </AnimatePresence>
       </div>
-    </motion.header> // ✅ FIXED: Changed from </header> to </motion.header>
+    </motion.header>
   );
 };
 

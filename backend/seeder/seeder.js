@@ -5,7 +5,6 @@ import { fileURLToPath } from "url";
 import Product from "../models/product.js";
 import products from "./data.js";
 
-// ✅ Fix the path for the env file
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, "../config/config.env") });

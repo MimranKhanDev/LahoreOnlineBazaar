@@ -1,20 +1,3 @@
-// src/components/Cart/ConfirmOrder.jsx
-
-/**
- * 📋 CONFIRM ORDER - Review order before payment
- *
- * Features:
- * 1. Shipping information display
- * 2. Order items list
- * 3. Order summary with totals
- * 4. Proceed to payment button
- *
- * 📦 Packages Used:
- * - react-hot-toast: v2+ (toast notifications)
- * - framer-motion: v9+ (animations)
- * - react-router-dom: v6 (navigation)
- */
-
 import { Fragment, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";

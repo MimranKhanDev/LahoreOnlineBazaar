@@ -1,22 +1,3 @@
-// src/components/Admin/NewProduct.jsx
-
-/**
- * ➕ NEW PRODUCT - Create new product
- *
- * Features:
- * 1. Product form (name, price, description, category, stock)
- * 2. Multiple image upload with preview
- * 3. Form validation
- *
- * 📦 Packages Used:
- * - react-hot-toast: v2+ (toast notifications)
- * - framer-motion: v9+ (animations)
- * - @mui/icons-material: v5+ (icons)
- *
- * 🔄 Redux Toolkit:
- * - productSlice: createProduct, clearErrors
- */
-
 import { Fragment, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -41,8 +22,6 @@ import {
   PhotoCamera,
   Close,
 } from "@mui/icons-material";
-
-// ✅ Redux Toolkit imports
 import {
   createProduct,
   clearErrors,
@@ -55,11 +34,7 @@ import MetaData from "../layout/MetaData";
 const NewProduct = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  // 📊 Redux state
   const { loading, error, isUpdated } = useSelector((state) => state.products);
-
-  // 🎨 Form state
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
@@ -67,10 +42,6 @@ const NewProduct = () => {
   const [stock, setStock] = useState("");
   const [images, setImages] = useState([]);
   const [imagesPreview, setImagesPreview] = useState([]);
-
-  /**
-   * 📂 Categories
-   */
   const categories = [
     "Laptop",
     "Footwear",
@@ -81,62 +52,33 @@ const NewProduct = () => {
     "SmartPhones",
     "Accessories",
   ];
-
-  /**
-   * 🖼️ Handle image upload
-   */
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-
     files.forEach((file) => {
       const reader = new FileReader();
-
       reader.onload = () => {
         if (reader.readyState === 2) {
           setImagesPreview((old) => [...old, reader.result]);
           setImages((old) => [...old, reader.result]);
         }
       };
-
       reader.readAsDataURL(file);
     });
   };
-
-  /**
-   * ❌ Remove image from preview
-   */
   const removeImage = (index) => {
     setImagesPreview(imagesPreview.filter((_, i) => i !== index));
     setImages(images.filter((_, i) => i !== index));
   };
-
-  /**
-   * 📝 Handle form submission
-   */
   const handleSubmit = (e) => {
     e.preventDefault();
-
     if (!name || !price || !description || !category || !stock) {
       toast.error("Please fill all fields");
       return;
     }
-
     if (images.length === 0) {
       toast.error("Please upload at least one image");
       return;
     }
-
-    // OLD CODE — BUGGY: FormData was sent without multipart middleware on the backend, so req.body was empty.
-    // const formData = new FormData();
-    // formData.append("name", name);
-    // formData.append("price", price);
-    // formData.append("description", description);
-    // formData.append("category", category);
-    // formData.append("Stock", stock);
-    // images.forEach((image) => formData.append("images", image));
-    // dispatch(createProduct(formData));
-
-    // NEW CODE — FIX: images are already base64 data URIs, so JSON reaches Express and Cloudinary can upload them.
     dispatch(
       createProduct({
         name,
@@ -148,21 +90,17 @@ const NewProduct = () => {
       }),
     );
   };
-
-  // 🔄 Effects
   useEffect(() => {
     if (error) {
       toast.error(error);
       dispatch(clearErrors());
     }
-
     if (isUpdated) {
       toast.success("Product created successfully! 🎉");
       dispatch(clearProductStatus());
       navigate("/admin/products");
     }
   }, [dispatch, error, isUpdated, navigate]);
-
   return (
     <Fragment>
       <MetaData title="Create Product | Admin Panel" />
@@ -170,9 +108,7 @@ const NewProduct = () => {
       <div className="min-h-screen bg-gray-50">
         <div className="flex">
           <Sidebar />
-
           <div className="flex-1 ml-64 p-6">
-            {/* 🏷️ Header */}
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -181,15 +117,12 @@ const NewProduct = () => {
               <h1 className="text-3xl font-bold">Create Product</h1>
               <p className="text-gray-500">Add a new product to your store</p>
             </motion.div>
-
-            {/* 📝 Form */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="bg-white rounded-2xl shadow-xl p-6 max-w-2xl"
             >
               <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Product Name */}
                 <TextField
                   fullWidth
                   label="Product Name"
@@ -197,7 +130,7 @@ const NewProduct = () => {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
-                  InputLabelProps={{ shrink: true }} // ✅ ADD THIS
+                  InputLabelProps={{ shrink: true }}
                   InputProps={{
                     startAdornment: (
                       <Spellcheck className="text-gray-400 mr-2" />

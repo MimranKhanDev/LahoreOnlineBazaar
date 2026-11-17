@@ -3,31 +3,6 @@ import axios from "axios";
 
 const API_URL = "/api/v1";
 
-/**
- * 🌟 ASYNC THUNK: What is it?
- *
- * Think of createAsyncThunk as a "super-powered action"
- * It handles API calls automatically!
- *
- * ❓ Why do we need this?
- *    Regular actions are synchronous (happen immediately)
- *    API calls are asynchronous (take time to complete)
- *    createAsyncThunk bridges this gap!
- *
- * ❓ How does it work?
- *    1. You call the thunk (like calling an API)
- *    2. It automatically dispatches 3 actions:
- *       - PENDING: When the request starts
- *       - FULFILLED: When the request succeeds
- *       - REJECTED: When the request fails
- *    3. You handle these in extraReducers
- *
- * ❓ What does each part mean?
- *    - 'products/getAll' → Action type prefix
- *    - async ({ keyword, ... }) → Function that makes the API call
- *    - return data → What gets sent to the reducer on success
- */
-
 export const getProducts = createAsyncThunk(
   "products/getAll",
   async ({
@@ -160,7 +135,6 @@ export const deleteReview = createAsyncThunk(
   "products/deleteReview",
   async ({ reviewId, productId }, { rejectWithValue }) => {
     try {
-      // ✅ FIXED: Changed /reviews to /admin/reviews and added withCredentials
       const { data } = await axios.delete(
         `${API_URL}/admin/reviews?id=${reviewId}&productId=${productId}`,
         { withCredentials: true },
@@ -171,19 +145,7 @@ export const deleteReview = createAsyncThunk(
     }
   },
 );
-/**
- * 🎨 Create Product Slice
- *
- * Now we create our "department" that handles all product-related state
- *
- * 🏗️ The slice has two types of reducers:
- * 1. reducers: For synchronous actions (like clearing errors)
- * 2. extraReducers: For async actions (from createAsyncThunk)
- *
- * ❓ What's the difference?
- *    - reducers: Actions you dispatch directly (clearErrors)
- *    - extraReducers: Auto-handled from createAsyncThunk
- */
+
 const productSlice = createSlice({
   name: "products",
   initialState: {
@@ -221,22 +183,7 @@ const productSlice = createSlice({
     reviewDeleted: false,
   },
 
-  /**
-   * 🔄 Synchronous Reducers
-   *
-   * These are actions that DON'T need API calls
-   * They just update the state directly
-   *
-   * ❓ When to use these?
-   *    - Clearing errors
-   *    - Resetting states
-   *    - Any action that doesn't need server communication
-   */
   reducers: {
-    /**
-     * Used to clear error messages after showing them
-     * Example: After showing "Product not found", clear the error
-     */
     clearErrors: (state) => {
       state.error = null;
       state.productError = null;
@@ -257,23 +204,12 @@ const productSlice = createSlice({
       state.reviewSuccess = false;
     },
 
-    /**
-     * 🧹 Reset Product
-     * Used when navigating away from product details
-     * Clears product data so old data doesn't show
-     */
     resetProduct: (state) => {
       state.product = null;
       state.productLoading = false;
       state.productError = null;
     },
 
-    /**
-     * 🧹 Reset Review State
-     *
-     * Used after review is submitted
-     * Resets review success flag
-     */
     resetReviewState: (state) => {
       state.reviewSuccess = false;
       state.reviewLoading = false;
@@ -281,23 +217,6 @@ const productSlice = createSlice({
     },
   },
 
-  /**
-   * ⚡ Async Reducers (extraReducers)
-   *
-   * These handle the 3 states of async actions:
-   * 1. PENDING: "Loading..."
-   * 2. FULFILLED: "Success!"
-   * 3. REJECTED: "Failed!"
-   *
-   * ❓ Why use builder pattern?
-   *    It's the modern way to add cases
-   *    More type-safe and cleaner
-   *
-   * ❓ What does addCase do?
-   *    It says: "When this action happens, do this"
-   *    Example: .addCase(getProducts.pending, (state) => { ... })
-   *    Means: "When getProducts starts loading, set loading = true"
-   */
   extraReducers: (builder) => {
     builder
       // ============= GET ALL PRODUCTS =============
@@ -451,12 +370,6 @@ const productSlice = createSlice({
   },
 });
 
-/**
- * 📤 STEP 4: Export Sync Actions
- *
- * These are the actions we dispatch directly
- * Example: dispatch(clearErrors())
- */
 export const {
   clearErrors,
   clearProductStatus,
@@ -464,21 +377,6 @@ export const {
   resetReviewState,
 } = productSlice.actions;
 
-/**
- * 📤 STEP 5: Export Selectors
- *
- * These are our "receptionists" that get data from the store
- *
- * ❓ Why so many selectors?
- *    Each component needs different data
- *    Home page needs products
- *    Product details page needs single product
- *    Admin needs admin products
- *
- * ❓ How to use in components?
- *    const products = useSelector(selectProducts);
- *    const loading = useSelector(selectProductLoading);
- */
 export const selectProducts = (state) => state.products.products;
 export const selectProductLoading = (state) => state.products.loading;
 export const selectProductError = (state) => state.products.error;
@@ -498,11 +396,4 @@ export const selectAdminError = (state) => state.products.adminError;
 export const selectReviewSuccess = (state) => state.products.reviewSuccess;
 export const selectReviewLoading = (state) => state.products.reviewLoading;
 export const selectReviewError = (state) => state.products.reviewError;
-
-/**
- * 📤 STEP 6: Export Reducer
- *
- * The reducer that gets added to the store
- * It's auto-generated by createSlice
- */
 export default productSlice.reducer;

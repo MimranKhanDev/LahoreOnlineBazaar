@@ -55,10 +55,6 @@ const Dashboard = () => {
   const outOfStock = products.filter((item) => item.Stock === 0).length;
   const totalAmount = orders.reduce((acc, item) => acc + item.totalPrice, 0);
 
-  /**
-   * 📈 Revenue chart data (Real Data from Backend)
-   */
-  // ✅ FIXED: Added a fallback for the empty state
   const revenueData =
     salesData.length > 0
       ? salesData.map((item) => ({
@@ -77,20 +73,12 @@ const Dashboard = () => {
           { name: "Sat", revenue: 0 },
           { name: "Sun", revenue: 0 },
         ];
-
-  /**
-   * 🍩 Stock pie chart data
-   */
   const stockData = [
     { name: "In Stock", value: products.length - outOfStock },
     { name: "Out of Stock", value: outOfStock },
   ];
 
   const COLORS = ["#22c55e", "#ef4444"];
-
-  /**
-   * 📊 Summary cards data
-   */
   const summaryCards = [
     {
       title: "Total Revenue",
@@ -132,12 +120,8 @@ const Dashboard = () => {
       <MetaData title="Dashboard | Admin Panel" />
 
       <div className="flex">
-        {/* 📋 Sidebar */}
         <Sidebar />
-
-        {/* 📊 Main Content */}
         <div className="flex-1 ml-64 p-6">
-          {/* 🏷️ Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -146,8 +130,6 @@ const Dashboard = () => {
             <h1 className="text-3xl font-bold">Dashboard</h1>
             <p className="text-gray-500">Welcome back, Admin!</p>
           </motion.div>
-
-          {/* 📊 Summary Cards */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -172,10 +154,7 @@ const Dashboard = () => {
               </motion.div>
             ))}
           </motion.div>
-
-          {/* 📈 Charts Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Revenue Chart - 2/3 width */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -211,8 +190,6 @@ const Dashboard = () => {
                 </ResponsiveContainer>
               </div>
             </motion.div>
-
-            {/* Stock Chart - 1/3 width */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -266,8 +243,6 @@ const Dashboard = () => {
               </div>
             </motion.div>
           </div>
-
-          {/* 📊 Quick Stats */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

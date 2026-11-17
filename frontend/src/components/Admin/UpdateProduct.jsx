@@ -1,17 +1,3 @@
-// src/components/Admin/UpdateProduct.jsx
-
-/**
- * ✏️ UPDATE PRODUCT - Edit existing product
- *
- * Features:
- * 1. Pre-filled form with product data
- * 2. Update name, price, description, category, stock
- * 3. Add/remove images
- *
- * 🔄 Redux Toolkit:
- * - productSlice: getProductDetails, updateProduct, clearErrors
- */
-
 import { Fragment, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";

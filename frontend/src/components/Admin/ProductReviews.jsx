@@ -1,23 +1,3 @@
-// src/components/Admin/ProductReviews.jsx
-
-/**
- * ⭐ PRODUCT REVIEWS - Admin review management
- *
- * Features:
- * 1. Search reviews by product ID
- * 2. Data grid with reviews
- * 3. Delete review action
- * 4. Rating indicators
- *
- * 📦 Packages Used:
- * - @mui/x-data-grid: v6+ (modern data grid)
- * - react-hot-toast: v2+ (toast notifications)
- * - framer-motion: v9+ (animations)
- *
- * 🔄 Redux Toolkit:
- * - productSlice: getProductReviews, deleteReview, clearErrors
- */
-
 import { Fragment, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
@@ -158,17 +138,6 @@ const ProductReviews = () => {
       comment: item.comment || "",
       user: item.name || "Anonymous",
     })) || [];
-
-  /*   // 🔄 Effects
-  useEffect(() => {
-    if (reviewsError) {
-      toast.error(reviewsError);
-      dispatch(clearErrors());}
-    if (reviewDeleted) {
-      toast.success("Review deleted successfully! 🎉");
-      if (productId) {
-        dispatch(getProductReviews(productId));}}
-  }, [dispatch, reviewsError, reviewDeleted, productId]); */
 
   // 🔄 Effects
   useEffect(() => {

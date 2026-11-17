@@ -1,18 +1,3 @@
-// src/components/Cart/CheckoutSteps.jsx
-
-/**
- * 📋 CHECKOUT STEPS - Stepper for checkout process
- *
- * Shows progress through:
- * 1. Shipping Details
- * 2. Confirm Order
- * 3. Payment
- *
- * 📦 Packages Used:
- * - @mui/material: v5+ (Stepper, Step, StepLabel)
- * - @mui/icons-material: v5+ (icons)
- */
-
 import { Stepper, Step, StepLabel, Box } from "@mui/material";
 import {
   LocalShipping,

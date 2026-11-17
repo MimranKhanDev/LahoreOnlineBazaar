@@ -1,8 +1,7 @@
 import { Link } from "react-router-dom";
-// import { Rating } from "@mui/lab";
 import Rating from "@mui/material/Rating";
 import { motion } from "framer-motion";
-import { AiOutlineHeart } from "react-icons/ai"; // Wishlist icon
+import { AiOutlineHeart } from "react-icons/ai";
 import toast from "react-hot-toast";
 
 const ProductCard = ({ product }) => {
@@ -12,14 +11,11 @@ const ProductCard = ({ product }) => {
     precision: 0.5,
     size: "small",
   };
-
-  // Calculate discount (example: if original price > current price)
   const discount = product.originalPrice
     ? Math.round(
         ((product.originalPrice - product.price) / product.originalPrice) * 100,
       )
     : null;
-
   return (
     <Link
       to={`/product/${product._id}`}

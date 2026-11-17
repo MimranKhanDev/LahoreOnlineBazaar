@@ -1,23 +1,3 @@
-// src/components/Order/MyOrders.jsx
-
-/**
- * 📋 MY ORDERS - User's order history
- *
- * Features:
- * 1. Data grid with order details
- * 2. Order ID, Status, Items Qty, Amount
- * 3. View order details link
- * 4. Status color coding
- *
- * 📦 Packages Used:
- * - @mui/x-data-grid: v6+ (modern data grid)
- * - react-hot-toast: v2+ (toast notifications)
- * - framer-motion: v9+ (animations)
- *
- * 🔄 Redux Toolkit:
- * - orderSlice: getMyOrders, clearOrderErrors
- */
-
 import { Fragment, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";

@@ -1,23 +1,3 @@
-// src/components/Admin/OrderList.jsx
-
-/**
- * 📋 ORDER LIST - Admin order management
- *
- * Features:
- * 1. Data grid with all orders
- * 2. Edit/Process order link
- * 3. Delete order action
- * 4. Status indicators
- *
- * 📦 Packages Used:
- * - @mui/x-data-grid: v6+ (modern data grid)
- * - react-hot-toast: v2+ (toast notifications)
- * - framer-motion: v9+ (animations)
- *
- * 🔄 Redux Toolkit:
- * - orderSlice: getAllOrders, deleteOrder, clearOrderErrors
- */
-
 import { Fragment, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
@@ -201,8 +181,8 @@ const OrderList = () => {
 
     if (isDeleted) {
       toast.success("Order deleted successfully! 🎉");
-      dispatch(clearOrderStatus()); // ✅ Reset the flag
-      dispatch(getAllOrders()); // Refresh table
+      dispatch(clearOrderStatus());
+      dispatch(getAllOrders());
     }
   }, [dispatch, error, isDeleted]);
 

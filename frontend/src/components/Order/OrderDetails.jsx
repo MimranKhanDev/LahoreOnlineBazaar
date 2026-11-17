@@ -1,25 +1,3 @@
-// src/components/Order/OrderDetails.jsx
-
-/**
- * 📋 ORDER DETAILS - View specific order details
- *
- * Features:
- * 1. Order information (ID, date, status)
- * 2. Shipping information
- * 3. Payment status
- * 4. Order items list
- * 5. Order summary with totals
- *
- * 📦 Packages Used:
- * - react-hot-toast: v2+ (toast notifications)
- * - framer-motion: v9+ (animations)
- * - react-icons: v4+ (icons)
- * - react-router-dom: v6 (navigation)
- *
- * 🔄 Redux Toolkit:
- * - orderSlice: getOrderDetails, clearOrderErrors
- */
-
 import { Fragment, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, Link } from "react-router-dom";

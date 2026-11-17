@@ -123,7 +123,6 @@ const orderSlice = createSlice({
     orderDetailsLoading: false,
     orderDetailsError: null,
     sales: [],
-    // ✅ FIXED: Added salesLoading to separate it from general loading
     salesLoading: false,
     loading: false,
     error: null,
@@ -184,8 +183,6 @@ const orderSlice = createSlice({
         state.allOrdersLoading = false;
         state.allOrdersError = action.payload || "Failed to fetch all orders";
       })
-
-      // ✅ FIXED: Using salesLoading
       .addCase(getSales.pending, (state) => {
         state.salesLoading = true;
       })

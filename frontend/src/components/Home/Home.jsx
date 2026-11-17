@@ -1,10 +1,9 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import toast from "react-hot-toast"; // 🆕 Modern toast
-import { motion } from "framer-motion"; // 🆕 For animations
+import toast from "react-hot-toast";
+import { motion } from "framer-motion";
 import { CgMouse } from "react-icons/cg";
 
-// 🆕 Updated imports for Redux Toolkit
 import {
   getProducts,
   clearErrors,
@@ -20,7 +19,6 @@ import ProductCard from "./ProductCard";
 const Home = () => {
   const dispatch = useDispatch();
 
-  // 🆕 Using Redux Toolkit selectors
   const products = useSelector(selectProducts);
   const loading = useSelector(selectProductLoading);
   const error = useSelector(selectProductError);

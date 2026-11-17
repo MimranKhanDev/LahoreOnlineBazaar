@@ -1,7 +1,5 @@
 import { v2 as cloudinary } from "cloudinary";
 import dotenv from "dotenv";
-
-// Force dotenv to load the variables (just in case)
 dotenv.config({ path: "backend/config/config.env" });
 
 cloudinary.config({

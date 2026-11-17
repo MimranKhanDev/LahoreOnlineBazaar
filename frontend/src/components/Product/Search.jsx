@@ -6,7 +6,6 @@ import toast from "react-hot-toast";
 import MetaData from "../layout/MetaData";
 
 const Search = () => {
-  // 🎯 State - Track what user types
   const [keyword, setKeyword] = useState("");
   const navigate = useNavigate();
   const searchSubmitHandler = (e) => {

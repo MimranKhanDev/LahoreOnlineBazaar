@@ -7,7 +7,6 @@ class APIFilters {
   search() {
     const keyword = this.queryStr.keyword
       ? {
-          // ✅ FIXED: Searches BOTH name and category so "lapt" finds "Laptop"
           $or: [
             { name: { $regex: this.queryStr.keyword, $options: "i" } },
             { category: { $regex: this.queryStr.keyword, $options: "i" } },

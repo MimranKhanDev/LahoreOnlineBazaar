@@ -1,43 +1,6 @@
-// backend/utils/sendEmail.js
-
-/**
- * 📧 SEND EMAIL - Nodemailer email sender
- *
- * This function sends emails using Nodemailer
- * Supports SMTP and mail services (Gmail, Outlook, etc.)
- *
- * 📝 HOW IT WORKS:
- *    1. Creates transporter with SMTP config
- *    2. Defines mail options
- *    3. Sends email
- *
- * 🔄 USAGE:
- *    await sendEmail({
- *      email: "user@example.com",
- *      subject: "Password Reset",
- *      message: "Click here to reset your password..."
- *    });
- *
- * ✅ YOUR VERSION IS BETTER BECAUSE:
- *    1. Has validation (checks if SMTP is configured)
- *    2. Has fallback values (port default)
- *    3. Returns boolean (success indicator)
- *    4. Better error handling
- *    5. Fixed environment variable names
- *
- * ⚠️ ENV VARIABLES NEEDED:
- *    SMTP_HOST = smtp.gmail.com
- *    SMTP_PORT = 587
- *    SMTP_SERVICE = gmail (optional)
- *    SMTP_EMAIL = your-email@gmail.com
- *    SMTP_PASSWORD = your-app-password
- *    SMTP_FROM_EMAIL = noreply@shopit.com (optional)
- */
-
 import nodemailer from "nodemailer";
 
 const sendEmail = async (options) => {
-  // ✅ Validate SMTP configuration
   if (
     !process.env.SMTP_HOST ||
     !process.env.SMTP_EMAIL ||
@@ -65,7 +28,7 @@ const sendEmail = async (options) => {
     to: options.email,
     subject: options.subject,
     text: options.message,
-    html: options.html || options.message, // HTML version (for rich emails)
+    html: options.html || options.message,
   };
 
   // ✅ Send email

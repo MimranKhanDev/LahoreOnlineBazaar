@@ -1,18 +1,3 @@
-// src/components/Cart/OrderSuccess.jsx
-
-/**
- * ✅ ORDER SUCCESS - Order confirmation page
- *
- * Features:
- * 1. Success animation
- * 2. Order confirmation message
- * 3. Links to view orders or continue shopping
- *
- * 📦 Packages Used:
- * - framer-motion: v9+ (animations)
- * - react-icons: v4+ (icons)
- */
-
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaCheckCircle, FaShoppingBag, FaHome } from "react-icons/fa";
