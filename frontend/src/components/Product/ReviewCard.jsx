@@ -42,7 +42,6 @@ const ReviewCard = ({ review }) => {
         <div>
           <p className="font-semibold text-gray-800 flex items-center gap-1">
             {review.user?.name || review.name || "Anonymous User"}
-            {/* Show verification badge if user is verified */}
             {review.isVerified && (
               <FaCheckCircle className="text-blue-500 text-sm" />
             )}

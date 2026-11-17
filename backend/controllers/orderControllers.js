@@ -112,8 +112,12 @@ export const deleteOrder = catchAsyncErrors(async (req, res, next) => {
 });
 
 export const getSales = catchAsyncErrors(async (req, res, next) => {
-  const startDate = new Date(req.query.startDate);
-  const endDate = new Date(req.query.endDate);
+  // ✅ FIXED: Default to last 30 days if no dates are provided
+  const startDate = new Date(
+    req.query.startDate || Date.now() - 30 * 24 * 60 * 60 * 1000,
+  );
+  const endDate = new Date(req.query.endDate || Date.now());
+
   startDate.setUTCHours(0, 0, 0, 0);
   endDate.setUTCHours(23, 59, 59, 999);
   const { salesData, totalSales, totalNumOrders } = await getSalesData(

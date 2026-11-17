@@ -197,6 +197,7 @@ const NewProduct = () => {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
+                  InputLabelProps={{ shrink: true }} // ✅ ADD THIS
                   InputProps={{
                     startAdornment: (
                       <Spellcheck className="text-gray-400 mr-2" />
@@ -255,7 +256,7 @@ const NewProduct = () => {
 
                 {/* Category */}
                 <FormControl fullWidth>
-                  <InputLabel>Category</InputLabel>
+                  <InputLabel shrink>Category</InputLabel>
                   <Select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}

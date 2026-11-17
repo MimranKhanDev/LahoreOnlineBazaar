@@ -1,24 +1,3 @@
-// src/components/Cart/Payment.jsx
-
-/**
- * 💳 PAYMENT - Stripe payment processing
- *
- * Features:
- * 1. Stripe card element integration
- * 2. Card number, expiry, CVC inputs
- * 3. Payment processing
- * 4. Order creation on success
- *
- * 📦 Packages Used:
- * - @stripe/react-stripe-js: v2+ (Stripe integration)
- * - @stripe/stripe-js: v2+ (Stripe JS)
- * - @mui/icons-material: v5+ (icons)
- * - react-hot-toast: v2+ (toast notifications)
- *
- * ⚠️ Note: Stripe is currently commented out (not implemented yet)
- * Uncomment when ready to integrate Stripe
- */
-
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
@@ -36,7 +15,6 @@ import {
   useElements,
 } from "@stripe/react-stripe-js";
 
-// ✅ Redux Toolkit imports
 import {
   selectCartItems,
   selectShippingInfo,
@@ -55,25 +33,18 @@ const Payment = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // 📊 Redux state
   const cartItems = useSelector(selectCartItems);
   const shippingInfo = useSelector(selectShippingInfo);
   const user = useSelector(selectUser);
   const { error } = useSelector((state) => state.orders);
 
-  // 🎯 Local state
   const [loading, setLoading] = useState(false);
   const payBtn = useRef(null);
 
-  // 💰 Get order info from session
   const orderInfo = JSON.parse(sessionStorage.getItem("orderInfo") || "{}");
-
   const stripe = useStripe();
   const elements = useElements();
 
-  /**
-   * 💳 Calculate totals
-   */
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.quantity * item.price,
     0,
@@ -82,9 +53,6 @@ const Payment = () => {
   const tax = subtotal * 0.18;
   const totalPrice = subtotal + tax + shippingCharges;
 
-  /**
-   * 📝 Order data
-   */
   const order = {
     shippingInfo,
     orderItems: cartItems,
@@ -92,10 +60,7 @@ const Payment = () => {
     taxPrice: tax,
     shippingPrice: shippingCharges,
     totalPrice: totalPrice,
-    paymentInfo: {
-      id: "pending", // Will be updated after payment
-      status: "pending",
-    },
+    paymentInfo: { id: "pending", status: "pending" },
   };
 
   const submitHandler = async (e) => {
@@ -111,11 +76,10 @@ const Payment = () => {
 
     try {
       const config = {
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         withCredentials: true,
       };
+
       const { data } = await axios.post(
         "/api/v1/payment/process",
         { amount: Math.round(orderInfo.totalPrice * 100) },
@@ -123,26 +87,20 @@ const Payment = () => {
       );
       const client_secret = data.client_secret;
 
+      // ✅ FIXED: Removed strict address from billing_details to prevent 400 errors
       const result = await stripe.confirmCardPayment(client_secret, {
         payment_method: {
           card: elements.getElement(CardNumberElement),
           billing_details: {
             name: user?.name || "Guest",
             email: user?.email || "",
-            address: {
-              line1: shippingInfo.address,
-              city: shippingInfo.city,
-              state: shippingInfo.state,
-              postal_code: shippingInfo.pinCode,
-              country: shippingInfo.country,
-            },
           },
         },
       });
 
       if (result.error) {
         payBtn.current.disabled = false;
-        setLoading(falses);
+        setLoading(false); // ✅ FIXED: Typo 'falses' changed to 'false'
         toast.error(result.error.message);
       } else {
         if (result.paymentIntent.status === "succeeded") {
@@ -170,7 +128,6 @@ const Payment = () => {
     }
   };
 
-  // 🔄 Effects
   useEffect(() => {
     if (error) {
       toast.error(error);
@@ -178,7 +135,6 @@ const Payment = () => {
     }
   }, [dispatch, error]);
 
-  // 🚫 Redirect if no order info
   if (!orderInfo || Object.keys(orderInfo).length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -198,8 +154,6 @@ const Payment = () => {
   return (
     <Fragment>
       <MetaData title="Payment | ECOMMERCE" />
-
-      {/* 📋 Checkout Steps */}
       <CheckoutSteps activeStep={2} />
 
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center px-4 py-12">
@@ -209,7 +163,6 @@ const Payment = () => {
           transition={{ duration: 0.5 }}
           className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full"
         >
-          {/* 🏷️ Header */}
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <CreditCard className="text-3xl text-red-500" />
@@ -218,10 +171,7 @@ const Payment = () => {
             <p className="text-gray-500 text-sm">Enter your card details</p>
           </div>
 
-          {/* 📝 Payment Form */}
           <form onSubmit={submitHandler} className="space-y-4">
-            {/* ⚠️ Stripe elements - Commented out until implemented */}
-
             <div className="space-y-4">
               {/* Card Number */}
               <div className="relative border-2 border-gray-200 rounded-xl focus-within:border-red-500 transition-colors">
@@ -281,7 +231,6 @@ const Payment = () => {
               </div>
             </div>
 
-            {/* Submit Button */}
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}

@@ -48,8 +48,7 @@ const Dashboard = () => {
   const products = useSelector(selectAdminProducts) || [];
   const orders = useSelector(selectAllOrders) || [];
   const users = useSelector(selectAllUsers) || [];
-  const loading = useSelector(selectAdminLoading);
-
+  const loading = useSelector(selectAdminLoading); // ✅ Only controls Admin Products loading
   const salesData = useSelector(selectSales) || [];
 
   // 📊 Calculate stats
@@ -59,6 +58,7 @@ const Dashboard = () => {
   /**
    * 📈 Revenue chart data (Real Data from Backend)
    */
+  // ✅ FIXED: Added a fallback for the empty state
   const revenueData =
     salesData.length > 0
       ? salesData.map((item) => ({
@@ -68,7 +68,15 @@ const Dashboard = () => {
           }),
           revenue: item.sales,
         }))
-      : [{ name: "No Sales Yet", revenue: 0 }];
+      : [
+          { name: "Mon", revenue: 0 },
+          { name: "Tue", revenue: 0 },
+          { name: "Wed", revenue: 0 },
+          { name: "Thu", revenue: 0 },
+          { name: "Fri", revenue: 0 },
+          { name: "Sat", revenue: 0 },
+          { name: "Sun", revenue: 0 },
+        ];
 
   /**
    * 🍩 Stock pie chart data

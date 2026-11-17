@@ -107,10 +107,10 @@ const ProcessOrder = () => {
     }
   }, [dispatch, error, isUpdated, navigate]);
 
-  // Set status when order loads
+  // ✅ FIXED: Set to empty so MUI doesn't complain about out-of-range values
   useEffect(() => {
     if (order && order._id) {
-      setStatus(order.orderStatus || "");
+      setStatus("");
     }
   }, [order]);
 

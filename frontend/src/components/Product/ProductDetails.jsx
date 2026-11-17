@@ -261,7 +261,10 @@ const ProductDetails = () => {
                 </Carousel>*/}
                 <div className="w-full h-[400px] md:h-[500px] flex items-center justify-center p-4">
                   <img
-                    src={product.images?.[0]?.url || "/placeholder.jpg"}
+                    // ✅ FIXED: Use activeImage state to show the clicked thumbnail
+                    src={
+                      product.images?.[activeImage]?.url || "/placeholder.jpg"
+                    }
                     alt={product.name}
                     className="w-full h-full object-contain"
                     onError={(e) => {

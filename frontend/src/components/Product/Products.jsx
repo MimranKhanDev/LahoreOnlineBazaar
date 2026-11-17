@@ -29,12 +29,17 @@ const Products = () => {
   const dispatch = useDispatch();
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [price, setPrice] = useState([0, 200000]);
-  const [category, setCategory] = useState("");
-  const [ratings, setRatings] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
+  const [category, setCategory] = useState("");
 
-  // 📊 Selectors
+  // ✅ FIXED: Visual states (for smooth dragging)
+  const [price, setPrice] = useState([0, 200000]);
+  const [ratings, setRatings] = useState(0);
+
+  // ✅ FIXED: Filter states (triggers API only when mouse is released)
+  const [filterPrice, setFilterPrice] = useState([0, 200000]);
+  const [filterRatings, setFilterRatings] = useState(0);
+
   const products = useSelector(selectProducts) || [];
   const loading = useSelector(selectProductLoading);
   const error = useSelector(selectProductError);
@@ -57,25 +62,31 @@ const Products = () => {
     setCurrentPage(pageNumber);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  // ✅ FIXED: Only updates visual state
   const handlePriceChange = (event, newPrice) => {
     setPrice(newPrice);
   };
+
+  // ✅ FIXED: Only updates visual state
+  const handleRatingsChange = (event, newRating) => {
+    setRatings(newRating);
+  };
+
   const handleCategoryClick = (categoryName) => {
     setCategory(categoryName === category ? "" : categoryName);
     setCurrentPage(1);
   };
-  const handleRatingsChange = (event, newRating) => {
-    setRatings(newRating);
-    setCurrentPage(1);
-  };
+
   const clearFilters = () => {
     setPrice([0, 200000]);
+    setFilterPrice([0, 200000]);
     setCategory("");
     setRatings(0);
+    setFilterRatings(0);
     setCurrentPage(1);
   };
 
-  // Handle Errors this is for error and the  below is for refetching them
   useEffect(() => {
     if (error) {
       toast.error(error);
@@ -83,30 +94,27 @@ const Products = () => {
     }
   }, [dispatch, error]);
 
-  // 🔄 Fetch products when filters change
-  // we changed code here
+  // ✅ FIXED: Uses filterPrice and filterRatings
   useEffect(() => {
     dispatch(
       getProducts({
         keyword: keyword || "",
         currentPage,
-        price,
+        price: filterPrice,
         category,
-        ratings,
+        ratings: filterRatings,
       }),
     );
-  }, [dispatch, keyword, currentPage, price, category, ratings]);
+  }, [dispatch, keyword, currentPage, filterPrice, category, filterRatings]);
 
   return (
     <Fragment>
       <MetaData title="Products | ECOMMERCE" />
-
       {loading ? (
         <Loader />
       ) : (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4">
           <div className="container mx-auto max-w-7xl">
-            {/* 🎯 Header */}
             <div className="text-center mb-8">
               <h1 className="text-4xl md:text-5xl font-bold mb-2">
                 {keyword ? `Results for "${keyword}"` : "All Products"}
@@ -117,16 +125,15 @@ const Products = () => {
             </div>
 
             <div className="flex flex-col lg:flex-row gap-8">
-              {/* 🎯 Filter Sidebar - Desktop */}
+              {/* Desktop Filters */}
               <div className="hidden lg:block lg:w-72 flex-shrink-0">
                 <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-24">
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-xl font-bold flex items-center gap-2">
-                      <FaFilter className="text-red-500" />
-                      Filters
+                      <FaFilter className="text-red-500" /> Filters
                     </h3>
                     {(price[0] > 0 ||
-                      price[1] < 25000 ||
+                      price[1] < 200000 ||
                       category ||
                       ratings > 0) && (
                       <button
@@ -138,7 +145,6 @@ const Products = () => {
                     )}
                   </div>
 
-                  {/* Price Filter */}
                   <div className="mb-6">
                     <Typography className="font-semibold mb-2">
                       Price Range
@@ -146,26 +152,26 @@ const Products = () => {
                     <Slider
                       value={price}
                       onChange={handlePriceChange}
+                      onChangeCommitted={(e, val) => {
+                        setFilterPrice(val); // ✅ FIXED: Only updates API state on mouse release
+                        setCurrentPage(1);
+                      }}
+                      disableSwap
                       valueLabelDisplay="auto"
                       min={0}
                       max={200000}
                       sx={{
                         color: "#ef4444",
-                        "& .MuiSlider-thumb": {
-                          backgroundColor: "#ef4444",
-                        },
-                        "& .MuiSlider-track": {
-                          backgroundColor: "#ef4444",
-                        },
+                        "& .MuiSlider-thumb": { backgroundColor: "#ef4444" },
+                        "& .MuiSlider-track": { backgroundColor: "#ef4444" },
                       }}
                     />
-                    <div className="flex justify-between text-sm text-gray-500">
-                      <span>₹{price[0]}</span>
-                      <span>₹{price[1]}</span>
+                    <div className="flex justify-between text-sm font-bold text-gray-800 mt-2">
+                      <span>${price[0].toLocaleString()}</span>
+                      <span>${price[1].toLocaleString()}</span>
                     </div>
                   </div>
 
-                  {/* Category Filter */}
                   <div className="mb-6">
                     <Typography className="font-semibold mb-2">
                       Categories
@@ -191,7 +197,6 @@ const Products = () => {
                     </div>
                   </div>
 
-                  {/* Ratings Filter */}
                   <div>
                     <Typography className="font-semibold mb-2">
                       Rating
@@ -200,18 +205,19 @@ const Products = () => {
                       <Slider
                         value={ratings}
                         onChange={handleRatingsChange}
+                        onChangeCommitted={(e, val) => {
+                          setFilterRatings(val); // ✅ FIXED: Only updates API state on mouse release
+                          setCurrentPage(1);
+                        }}
+                        disableSwap
                         min={0}
                         max={5}
                         step={0.5}
                         valueLabelDisplay="auto"
                         sx={{
                           color: "#ef4444",
-                          "& .MuiSlider-thumb": {
-                            backgroundColor: "#ef4444",
-                          },
-                          "& .MuiSlider-track": {
-                            backgroundColor: "#ef4444",
-                          },
+                          "& .MuiSlider-thumb": { backgroundColor: "#ef4444" },
+                          "& .MuiSlider-track": { backgroundColor: "#ef4444" },
                         }}
                       />
                       <div className="flex items-center">
@@ -223,7 +229,7 @@ const Products = () => {
                 </div>
               </div>
 
-              {/* 🎯 Mobile Filter Toggle */}
+              {/* Mobile Filters */}
               <div className="lg:hidden">
                 <button
                   onClick={() => setShowFilters(!showFilters)}
@@ -232,14 +238,6 @@ const Products = () => {
                   <div className="flex items-center gap-2">
                     <FaFilter className="text-red-500" />
                     <span className="font-semibold">Filters</span>
-                    {(price[0] > 0 ||
-                      price[1] < 25000 ||
-                      category ||
-                      ratings > 0) && (
-                      <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                        Active
-                      </span>
-                    )}
                   </div>
                   <span>
                     {showFilters ? <FaChevronRight /> : <FaChevronLeft />}
@@ -255,17 +253,12 @@ const Products = () => {
                   >
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-bold">Filters</h3>
-                      {(price[0] > 0 ||
-                        price[1] < 25000 ||
-                        category ||
-                        ratings > 0) && (
-                        <button
-                          onClick={clearFilters}
-                          className="text-sm text-red-500 font-medium"
-                        >
-                          Clear All
-                        </button>
-                      )}
+                      <button
+                        onClick={clearFilters}
+                        className="text-sm text-red-500 font-medium"
+                      >
+                        Clear All
+                      </button>
                     </div>
 
                     <div className="mb-4">
@@ -275,6 +268,11 @@ const Products = () => {
                       <Slider
                         value={price}
                         onChange={handlePriceChange}
+                        onChangeCommitted={(e, val) => {
+                          setFilterPrice(val);
+                          setCurrentPage(1);
+                        }}
+                        disableSwap
                         valueLabelDisplay="auto"
                         min={0}
                         max={200000}
@@ -293,11 +291,6 @@ const Products = () => {
                             label={cat}
                             onClick={() => handleCategoryClick(cat)}
                             color={category === cat ? "primary" : "default"}
-                            sx={{
-                              backgroundColor:
-                                category === cat ? "#ef4444" : "#f3f4f6",
-                              color: category === cat ? "white" : "#374151",
-                            }}
                           />
                         ))}
                       </div>
@@ -310,6 +303,11 @@ const Products = () => {
                       <Slider
                         value={ratings}
                         onChange={handleRatingsChange}
+                        onChangeCommitted={(e, val) => {
+                          setFilterRatings(val);
+                          setCurrentPage(1);
+                        }}
+                        disableSwap
                         min={0}
                         max={5}
                         step={0.5}
@@ -321,7 +319,7 @@ const Products = () => {
                 )}
               </div>
 
-              {/* 🎯 Product Grid */}
+              {/* Product Grid */}
               <div className="flex-1">
                 {products && products.length > 0 ? (
                   <>
@@ -339,34 +337,8 @@ const Products = () => {
                       ))}
                     </div>
 
-                    {/* Pagination - Only show if more than 1 page */}
-                    {/* {resultPerPage < filteredProductsCount && (
-                      <div className="flex justify-center mt-12">
-                        <Pagination
-                          activePage={currentPage}
-                          itemsCountPerPage={resultPerPage}
-                          // totalItemsCount={productsCount} // fix is that it will show all results in db
-                          totalItemsCount={filteredProductsCount}
-                          onChange={handlePageChange}
-                          nextPageText={<FaChevronRight />}
-                          prevPageText={<FaChevronLeft />}
-                          firstPageText="First"
-                          lastPageText="Last"
-                          itemClass="w-10 h-10 flex items-center justify-center border border-gray-200 bg-white hover:bg-gray-50 transition-colors"
-                          linkClass="text-gray-700 hover:text-red-500 transition-colors"
-                          activeClass="!bg-red-500 !border-red-500"
-                          activeLinkClass="!text-white"
-                          disabledClass="opacity-50 cursor-not-allowed"
-                          itemClassFirst="rounded-l-lg"
-                          itemClassLast="rounded-r-lg"
-                        />
-                      </div>
-                    )} */}
-
-                    {/* Pagination - Only show if more than 1 page */}
                     {resultPerPage < filteredProductsCount && (
                       <div className="flex justify-center items-center mt-12 gap-2">
-                        {/* Previous Button */}
                         <button
                           onClick={() => handlePageChange(currentPage - 1)}
                           disabled={currentPage === 1}
@@ -375,7 +347,6 @@ const Products = () => {
                           <FaChevronLeft />
                         </button>
 
-                        {/* Page Numbers */}
                         {Array.from(
                           {
                             length: Math.ceil(
@@ -397,7 +368,6 @@ const Products = () => {
                           </button>
                         ))}
 
-                        {/* Next Button */}
                         <button
                           onClick={() => handlePageChange(currentPage + 1)}
                           disabled={

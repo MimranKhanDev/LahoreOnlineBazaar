@@ -63,7 +63,7 @@ export const getAdminProducts = createAsyncThunk(
       });
       return data.products;
     } catch (error) {
-      return rejectWithValue(error.response.data.message || payload);
+      return rejectWithValue(error.response?.data?.message || error.message);
     }
   },
 );
@@ -82,7 +82,7 @@ export const createProduct = createAsyncThunk(
       );
       return data;
     } catch (error) {
-      return rejectWithValue(error.response.data.message || payload);
+      return rejectWithValue(error.response?.data?.message || error.message);
     }
   },
 );
@@ -101,7 +101,7 @@ export const updateProduct = createAsyncThunk(
       );
       return data.success;
     } catch (error) {
-      return rejectWithValue(error.response.data.message || payload);
+      return rejectWithValue(error.response?.data?.message || error.message);
     }
   },
 );
@@ -113,7 +113,7 @@ export const deleteProduct = createAsyncThunk(
       const { data } = await axios.delete(`${API_URL}/admin/product/${id}`);
       return data.success;
     } catch (error) {
-      return rejectWithValue(error.response.data.message || payload);
+      return rejectWithValue(error.response?.data?.message || error.message);
     }
   },
 );
@@ -125,7 +125,7 @@ export const getProductDetails = createAsyncThunk(
       const { data } = await axios.get(`${API_URL}/product/${id}`);
       return data.product;
     } catch (error) {
-      return rejectWithValue(error.response.data.message || payload);
+      return rejectWithValue(error.response?.data?.message || error.message);
     }
   },
 );
@@ -139,7 +139,7 @@ export const createReview = createAsyncThunk(
       });
       return data.success;
     } catch (error) {
-      return rejectWithValue(error.response.data.message || payload);
+      return rejectWithValue(error.response?.data?.message || error.message);
     }
   },
 );
@@ -151,7 +151,7 @@ export const getProductReviews = createAsyncThunk(
       const { data } = await axios.get(`${API_URL}/reviews?id=${productId}`);
       return data.reviews;
     } catch (error) {
-      return rejectWithValue(error.response.data.message || payload);
+      return rejectWithValue(error.response?.data?.message || error.message);
     }
   },
 );
@@ -160,16 +160,17 @@ export const deleteReview = createAsyncThunk(
   "products/deleteReview",
   async ({ reviewId, productId }, { rejectWithValue }) => {
     try {
+      // ✅ FIXED: Changed /reviews to /admin/reviews and added withCredentials
       const { data } = await axios.delete(
-        `${API_URL}/reviews?id=${reviewId}&productId=${productId}`,
+        `${API_URL}/admin/reviews?id=${reviewId}&productId=${productId}`,
+        { withCredentials: true },
       );
       return data.success;
     } catch (error) {
-      return rejectWithValue(error.response.data.message || payload);
+      return rejectWithValue(error.response?.data?.message || error.message);
     }
   },
 );
-
 /**
  * 🎨 Create Product Slice
  *

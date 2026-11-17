@@ -1,8 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-const API_URL = "/api/v1";
 
-// ============= USER ROUTES OR ACCESSIBLE TO USER =============
+const API_URL = "/api/v1";
 
 export const loginUser = createAsyncThunk(
   "user/login",
@@ -126,8 +125,6 @@ export const resetPassword = createAsyncThunk(
   },
 );
 
-// ============= ADMIN ROUTES OR ACCESSIBLE TO ONLY ADMIN =============
-
 export const getAllUsers = createAsyncThunk(
   "user/getAllUsers",
   async (_, { rejectWithValue }) => {
@@ -200,6 +197,9 @@ const userSlice = createSlice({
     isUpdated: false,
     isDeleted: false,
     users: [],
+    userDetails: null, // ✅ CRUCIAL FIX
+    userDetailsLoading: false, // ✅ CRUCIAL FIX
+    allUsersLoading: false,
   },
   reducers: {
     clearErrors: (state) => {
@@ -211,10 +211,8 @@ const userSlice = createSlice({
       state.isDeleted = false;
     },
   },
-
   extraReducers: (builder) => {
     builder
-      // ============= LOGIN =============
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -229,11 +227,8 @@ const userSlice = createSlice({
         state.loading = false;
         state.isAuthenticated = false;
         state.user = null;
-        // state.error = action.error.message || "Login failed";
-        state.error = action.payload || "Login failed"; // ✅ Use action.payload
+        state.error = action.payload || "Login failed";
       })
-
-      // ============= REGISTER =============
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -250,8 +245,6 @@ const userSlice = createSlice({
         state.user = null;
         state.error = action.payload || "Registration failed";
       })
-
-      // ============= LOAD USER =============
       .addCase(loadUser.pending, (state) => {
         state.loading = true;
       })
@@ -265,16 +258,12 @@ const userSlice = createSlice({
         state.isAuthenticated = false;
         state.user = null;
       })
-
-      // ============= LOGOUT =============
       .addCase(logoutUser.fulfilled, (state) => {
         state.loading = false;
         state.isAuthenticated = false;
         state.user = null;
         state.error = null;
       })
-
-      // ============= UPDATE PROFILE =============
       .addCase(updateProfile.pending, (state) => {
         state.loading = true;
         state.isUpdated = false;
@@ -290,8 +279,6 @@ const userSlice = createSlice({
         state.isUpdated = false;
         state.error = action.payload || "Profile update failed";
       })
-
-      // ============= UPDATE PASSWORD =============
       .addCase(updatePassword.pending, (state) => {
         state.loading = true;
         state.isUpdated = false;
@@ -306,8 +293,6 @@ const userSlice = createSlice({
         state.isUpdated = false;
         state.error = action.payload || "Password update failed";
       })
-
-      // ============= FORGOT PASSWORD =============
       .addCase(forgotPassword.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -322,8 +307,6 @@ const userSlice = createSlice({
         state.loading = false;
         state.error = action.payload || "Forgot password failed";
       })
-
-      // ============= RESET PASSWORD =============
       .addCase(resetPassword.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -340,54 +323,51 @@ const userSlice = createSlice({
         state.error = action.payload || "Reset password failed";
       })
 
-      // ============= GET ALL USERS (Admin) =============
       .addCase(getAllUsers.pending, (state) => {
-        state.loading = true;
+        state.allUsersLoading = true;
         state.error = null;
       })
       .addCase(getAllUsers.fulfilled, (state, action) => {
-        state.loading = false;
+        state.allUsersLoading = false;
         state.users = action.payload;
         state.error = null;
       })
       .addCase(getAllUsers.rejected, (state, action) => {
-        state.loading = false;
+        state.allUsersLoading = false;
         state.error = action.payload || "Failed to fetch users";
       })
 
-      // ============= GET USER DETAILS (Admin) =============
+      // ✅ FIXED: These now use userDetailsLoading, protecting the main 'loading' state
       .addCase(getUserDetails.pending, (state) => {
-        state.loading = true;
+        state.userDetailsLoading = true;
         state.error = null;
       })
       .addCase(getUserDetails.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = action.payload;
+        state.userDetailsLoading = false;
+        state.userDetails = action.payload;
         state.error = null;
       })
       .addCase(getUserDetails.rejected, (state, action) => {
-        state.loading = false;
+        state.userDetailsLoading = false;
         state.error = action.payload || "Failed to fetch user";
       })
 
-      // ============= UPDATE USER (Admin) =============
       .addCase(updateUser.pending, (state) => {
-        state.loading = true;
+        state.userDetailsLoading = true;
         state.isUpdated = false;
         state.error = null;
       })
       .addCase(updateUser.fulfilled, (state) => {
-        state.loading = false;
+        state.userDetailsLoading = false;
         state.isUpdated = true;
         state.error = null;
       })
       .addCase(updateUser.rejected, (state, action) => {
-        state.loading = false;
+        state.userDetailsLoading = false;
         state.isUpdated = false;
         state.error = action.payload || "User update failed";
       })
 
-      // ============= DELETE USER (Admin) =============
       .addCase(deleteUser.pending, (state) => {
         state.loading = true;
         state.isDeleted = false;
@@ -413,4 +393,5 @@ export const selectIsAuthenticated = (state) => state.user.isAuthenticated;
 export const selectUserLoading = (state) => state.user.loading;
 export const selectUserError = (state) => state.user.error;
 export const selectAllUsers = (state) => state.user.users;
+
 export default userSlice.reducer;

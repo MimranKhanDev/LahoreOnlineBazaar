@@ -3,8 +3,6 @@ import axios from "axios";
 
 const API_URL = "/api/v1";
 
-// ============= ASYNC THUNKS =============
-
 export const createOrder = createAsyncThunk(
   "orders/create",
   async (orderData, { rejectWithValue }) => {
@@ -102,13 +100,12 @@ export const getSales = createAsyncThunk(
       const { data } = await axios.get(`${API_URL}/admin/get_sales`, {
         withCredentials: true,
       });
-      return data; // Returns { totalSales, totalNumOrders, sales }
+      return data;
     } catch (error) {
       return rejectWithValue(error.response.data.message || error.message);
     }
   },
 );
-// ============= SLICE =============
 
 const orderSlice = createSlice({
   name: "orders",
@@ -116,24 +113,20 @@ const orderSlice = createSlice({
     order: null,
     orderLoading: false,
     orderError: null,
-
     myOrders: [],
     myOrdersLoading: false,
     myOrdersError: null,
-
     allOrders: [],
     allOrdersLoading: false,
     allOrdersError: null,
-
     orderDetails: null,
     orderDetailsLoading: false,
     orderDetailsError: null,
-
     sales: [],
-
+    // ✅ FIXED: Added salesLoading to separate it from general loading
+    salesLoading: false,
     loading: false,
     error: null,
-
     isUpdated: false,
     isDeleted: false,
   },
@@ -143,7 +136,7 @@ const orderSlice = createSlice({
       state.myOrdersError = null;
       state.allOrdersError = null;
       state.orderDetailsError = null;
-      state.error = null; // ✅ Clear generic error
+      state.error = null;
     },
     clearOrderStatus: (state) => {
       state.isUpdated = false;
@@ -152,7 +145,6 @@ const orderSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // ============= CREATE ORDER =============
       .addCase(createOrder.pending, (state) => {
         state.orderLoading = true;
         state.orderError = null;
@@ -164,10 +156,8 @@ const orderSlice = createSlice({
       })
       .addCase(createOrder.rejected, (state, action) => {
         state.orderLoading = false;
-        state.orderError = action.payload || "Failed to create order"; // ✅ Fixed
+        state.orderError = action.payload || "Failed to create order";
       })
-
-      // ============= GET MY ORDERS =============
       .addCase(getMyOrders.pending, (state) => {
         state.myOrdersLoading = true;
         state.myOrdersError = null;
@@ -179,10 +169,8 @@ const orderSlice = createSlice({
       })
       .addCase(getMyOrders.rejected, (state, action) => {
         state.myOrdersLoading = false;
-        state.myOrdersError = action.payload || "Failed to fetch orders"; // ✅ Fixed
+        state.myOrdersError = action.payload || "Failed to fetch orders";
       })
-
-      // ============= GET ALL ORDERS (Admin) =============
       .addCase(getAllOrders.pending, (state) => {
         state.allOrdersLoading = true;
         state.allOrdersError = null;
@@ -194,23 +182,22 @@ const orderSlice = createSlice({
       })
       .addCase(getAllOrders.rejected, (state, action) => {
         state.allOrdersLoading = false;
-        state.allOrdersError = action.payload || "Failed to fetch all orders"; // ✅ Fixed
+        state.allOrdersError = action.payload || "Failed to fetch all orders";
       })
 
-      // ============= GET SALES =============
+      // ✅ FIXED: Using salesLoading
       .addCase(getSales.pending, (state) => {
-        state.loading = true;
+        state.salesLoading = true;
       })
       .addCase(getSales.fulfilled, (state, action) => {
-        state.loading = false;
+        state.salesLoading = false;
         state.sales = action.payload.sales;
       })
       .addCase(getSales.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
+        state.salesLoading = false;
+        state.error = action.payload || "Failed to fetch sales";
       })
 
-      // ============= GET ORDER DETAILS =============
       .addCase(getOrderDetails.pending, (state) => {
         state.orderDetailsLoading = true;
         state.orderDetailsError = null;
@@ -223,12 +210,10 @@ const orderSlice = createSlice({
       .addCase(getOrderDetails.rejected, (state, action) => {
         state.orderDetailsLoading = false;
         state.orderDetailsError =
-          action.payload || "Failed to fetch order details"; // ✅ Fixed
+          action.payload || "Failed to fetch order details";
       })
-
-      // ============= UPDATE ORDER STATUS =============
       .addCase(updateOrderStatus.pending, (state) => {
-        state.loading = true; // ✅ Now exists in initialState
+        state.loading = true;
         state.isUpdated = false;
         state.error = null;
       })
@@ -240,10 +225,8 @@ const orderSlice = createSlice({
       .addCase(updateOrderStatus.rejected, (state, action) => {
         state.loading = false;
         state.isUpdated = false;
-        state.error = action.payload || "Failed to update order"; // ✅ Fixed
+        state.error = action.payload || "Failed to update order";
       })
-
-      // ============= DELETE ORDER =============
       .addCase(deleteOrder.pending, (state) => {
         state.loading = true;
         state.isDeleted = false;
@@ -257,13 +240,12 @@ const orderSlice = createSlice({
       .addCase(deleteOrder.rejected, (state, action) => {
         state.loading = false;
         state.isDeleted = false;
-        state.error = action.payload || "Failed to delete order"; // ✅ Fixed
+        state.error = action.payload || "Failed to delete order";
       });
   },
 });
 
 export const { clearOrderErrors, clearOrderStatus } = orderSlice.actions;
-
 export const selectMyOrders = (state) => state.orders.myOrders;
 export const selectOrderDetails = (state) => state.orders.orderDetails;
 export const selectMyOrdersLoading = (state) => state.orders.myOrdersLoading;
@@ -273,9 +255,7 @@ export const selectAllOrdersLoading = (state) => state.orders.allOrdersLoading;
 export const selectAllOrdersError = (state) => state.orders.allOrdersError;
 export const selectOrderDetailsLoading = (state) =>
   state.orders.orderDetailsLoading;
-
 export const selectSales = (state) => state.orders.sales;
-
 export const selectOrderDetailsError = (state) =>
   state.orders.orderDetailsError;
 

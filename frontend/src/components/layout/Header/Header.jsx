@@ -23,6 +23,9 @@ const Header = () => {
   const [keyword, setKeyword] = useState("");
   const [isScrolled, setIsScrolled] = useState(false);
 
+  const [isNavbarVisible, setIsNavbarVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
   const cartItems = useSelector(selectCartItems);
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectUser);
@@ -33,11 +36,20 @@ const Header = () => {
   // 🎯 Scroll effect for header
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
+      const currentScrollY = window.scrollY;
+      setIsScrolled(currentScrollY > 10);
+
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setIsNavbarVisible(false); // Scrolling down
+      } else {
+        setIsNavbarVisible(true); // Scrolling up
+      }
+      setLastScrollY(currentScrollY);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    // ✅ FIXED: Added lastScrollY to dependency array so it tracks properly
+  }, [lastScrollY]);
 
   const searchSubmitHandler = (e) => {
     e.preventDefault();
@@ -57,7 +69,11 @@ const Header = () => {
   ];
 
   return (
-    <header
+    <motion.header
+      // ✅ Animate it based on scroll direction
+      initial={{ y: 0 }}
+      animate={{ y: isNavbarVisible ? 0 : "-100%" }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
       className={`sticky top-0 z-50 transition-all duration-300 ${
         isScrolled
           ? "bg-white/95 backdrop-blur-md shadow-lg"
@@ -146,7 +162,8 @@ const Header = () => {
                 </motion.div>
               )}
             </Link>
-            {/* ✅ NEW: Logout Button */}
+
+            {/* ✅ Logout Button */}
             {isAuthenticated && (
               <button
                 onClick={() => {
@@ -264,7 +281,7 @@ const Header = () => {
                     </Link>
                   )}
 
-                  {/* ✅ NEW: Mobile Logout Button */}
+                  {/* ✅ Mobile Logout Button */}
                   {isAuthenticated && (
                     <button
                       onClick={() => {
@@ -283,7 +300,7 @@ const Header = () => {
           )}
         </AnimatePresence>
       </div>
-    </header>
+    </motion.header> // ✅ FIXED: Changed from </header> to </motion.header>
   );
 };
 

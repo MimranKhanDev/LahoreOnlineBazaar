@@ -1,26 +1,9 @@
-// src/components/Cart/Shipping.jsx
-
-/**
- * 📦 SHIPPING - Shipping address form
- *
- * Features:
- * 1. Address input fields
- * 2. Country and State dropdowns
- * 3. Phone number validation
- * 4. Form submission with Redux
- *
- * 📦 Packages Used:
- * - country-state-city: v2+ (country/state data)
- * - react-hot-toast: v2+ (toast notifications)
- * - @mui/icons-material: v5+ (icons)
- */
-
 import { Fragment, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
-import { Country, State } from "country-state-city";
+import { Country, State } from "country-state-city"; // ✅ FIXED: Correct imports
 import {
   Home,
   LocationCity,
@@ -30,7 +13,6 @@ import {
   TransferWithinAStation,
 } from "@mui/icons-material";
 
-// ✅ Redux Toolkit imports
 import {
   saveShippingInfo,
   selectShippingInfo,
@@ -43,10 +25,8 @@ const Shipping = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // 📊 Get existing shipping info from Redux
   const shippingInfo = useSelector(selectShippingInfo);
 
-  // 🎨 Local state
   const [address, setAddress] = useState(shippingInfo?.address || "");
   const [city, setCity] = useState(shippingInfo?.city || "");
   const [state, setState] = useState(shippingInfo?.state || "");
@@ -54,26 +34,20 @@ const Shipping = () => {
   const [pinCode, setPinCode] = useState(shippingInfo?.pinCode || "");
   const [phoneNo, setPhoneNo] = useState(shippingInfo?.phoneNo || "");
 
-  /**
-   * 📝 Handle form submission
-   */
   const shippingSubmit = (e) => {
     e.preventDefault();
 
-    // ✅ Validate phone number (10 digits)
     if (phoneNo.length !== 10) {
       toast.error("Phone number must be exactly 10 digits");
       return;
     }
 
-    // ✅ Validate all fields
     if (!address || !city || !state || !country || !pinCode) {
       toast.error("Please fill all fields");
       return;
     }
 
-    // 💾 Save shipping info to Redux
-    // We find the actual names so the database and admin dashboard look nice
+    // ✅ FIXED: Translate ISO codes back to names for the database
     const countryName = Country.getCountryByCode(country)?.name || country;
     const stateName =
       State.getStateByCodeAndCountry(state, country)?.name || state;
@@ -82,8 +56,8 @@ const Shipping = () => {
       saveShippingInfo({
         address,
         city,
-        state: stateName,
-        country: countryName,
+        state: stateName, // Save "Punjab" instead of "PB"
+        country: countryName, // Save "Pakistan" instead of "PK"
         pinCode: Number(pinCode),
         phoneNo: Number(phoneNo),
       }),
@@ -95,11 +69,8 @@ const Shipping = () => {
   return (
     <Fragment>
       <MetaData title="Shipping Details | ECOMMERCE" />
-
-      {/* 📋 Checkout Steps */}
       <CheckoutSteps activeStep={0} />
 
-      {/* 📝 Shipping Form */}
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4">
         <div className="container mx-auto max-w-md">
           <motion.div
@@ -108,7 +79,6 @@ const Shipping = () => {
             transition={{ duration: 0.5 }}
             className="bg-white rounded-3xl shadow-2xl overflow-hidden"
           >
-            {/* 🏷️ Header */}
             <div className="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4">
               <h2 className="text-xl font-bold text-white">Shipping Details</h2>
               <p className="text-red-100 text-sm">
@@ -116,7 +86,6 @@ const Shipping = () => {
               </p>
             </div>
 
-            {/* 📝 Form */}
             <form onSubmit={shippingSubmit} className="p-6 space-y-4">
               {/* Address */}
               <div className="relative">
@@ -186,12 +155,12 @@ const Shipping = () => {
                   className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-red-500 transition-colors appearance-none bg-white"
                 >
                   <option value="">Select Country</option>
-                  {Country &&
-                    state.getAllCountries(country).map((item) => (
-                      <option key={item.isoCode} value={item.isoCode}>
-                        {item.name}
-                      </option>
-                    ))}
+                  {/* ✅ FIXED: Using Country.getAllCountries() and ISO codes */}
+                  {Country.getAllCountries().map((item) => (
+                    <option key={item.isoCode} value={item.isoCode}>
+                      {item.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -208,16 +177,16 @@ const Shipping = () => {
                   }`}
                 >
                   <option value="">Select State</option>
+                  {/* ✅ FIXED: Correctly maps states based on country ISO code */}
                   {country &&
                     State.getStatesOfCountry(country).map((item) => (
-                      <option key={item.isoCode} value={item.name}>
+                      <option key={item.isoCode} value={item.isoCode}>
                         {item.name}
                       </option>
                     ))}
                 </select>
               </div>
 
-              {/* Submit Button */}
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}

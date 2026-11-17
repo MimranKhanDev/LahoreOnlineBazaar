@@ -1,17 +1,3 @@
-// src/components/Admin/UpdateUser.jsx
-
-/**
- * ✏️ UPDATE USER - Admin user management
- *
- * Features:
- * 1. Update user name
- * 2. Update user email
- * 3. Change user role (admin/user)
- *
- * 🔄 Redux Toolkit:
- * - userSlice: getUserDetails, updateUser, clearErrors
- */
-
 import { Fragment, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";
@@ -28,15 +14,11 @@ import {
 } from "@mui/material";
 import { Person, Mail, VerifiedUser } from "@mui/icons-material";
 
-// ✅ Redux Toolkit imports
 import {
   getUserDetails,
   updateUser,
   clearErrors,
   clearMessages,
-  selectUser,
-  selectUserLoading,
-  selectUserError,
 } from "../../features/user/userSlice";
 
 import Sidebar from "./Sidebar";
@@ -48,11 +30,9 @@ const UpdateUser = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // 📊 Redux state
-  const user = useSelector(selectUser);
-  const loading = useSelector(selectUserLoading);
-  const error = useSelector(selectUserError);
-  const { isUpdated, loading: updateLoading } = useSelector(
+  // ✅ FIXED: Read from userDetails instead of user
+  const user = useSelector((state) => state.user.userDetails);
+  const { userDetailsLoading, isUpdated, error } = useSelector(
     (state) => state.user,
   );
 
@@ -60,9 +40,6 @@ const UpdateUser = () => {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("");
 
-  /**
-   * 📝 Handle form submission
-   */
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!name || !email || !role) {
@@ -72,40 +49,24 @@ const UpdateUser = () => {
     dispatch(updateUser({ id, userData: { name, email, role } }));
   };
 
-  /*   // 🔄 Effects
-  useEffect(() => {
-    if (error) {
-      toast.error(error);
-      dispatch(clearErrors());}
-    if (isUpdated) {
-      toast.success("User updated successfully! 🎉");
-      navigate("/admin/users");}
-    if (id) {
-      dispatch(getUserDetails(id));}
-  }, [dispatch, id, error, isUpdated, navigate]); */
-
-  // 🔄 Fetch user details on mount
   useEffect(() => {
     if (id) {
       dispatch(getUserDetails(id));
     }
   }, [dispatch, id]);
 
-  // 🔄 Handle Errors and Update Success
   useEffect(() => {
     if (error) {
       toast.error(error);
       dispatch(clearErrors());
     }
-
     if (isUpdated) {
       toast.success("User updated successfully! 🎉");
-      dispatch(clearMessages()); // ✅ Reset the flag to prevent toast spam
+      dispatch(clearMessages());
       navigate("/admin/users");
     }
   }, [dispatch, error, isUpdated, navigate]);
 
-  // Populate form when user loads
   useEffect(() => {
     if (user && user._id) {
       setName(user.name || "");
@@ -114,18 +75,15 @@ const UpdateUser = () => {
     }
   }, [user]);
 
-  if (loading) return <Loader />;
+  if (userDetailsLoading) return <Loader />;
 
   return (
     <Fragment>
       <MetaData title="Update User | Admin Panel" />
-
       <div className="min-h-screen bg-gray-50">
         <div className="flex">
           <Sidebar />
-
           <div className="flex-1 ml-64 p-6">
-            {/* 🏷️ Header */}
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -135,7 +93,6 @@ const UpdateUser = () => {
               <p className="text-gray-500">Edit user details and permissions</p>
             </motion.div>
 
-            {/* 📝 Form */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -149,6 +106,7 @@ const UpdateUser = () => {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
+                  InputLabelProps={{ shrink: true }} // ✅ FIXED
                   InputProps={{
                     startAdornment: <Person className="text-gray-400 mr-2" />,
                   }}
@@ -162,13 +120,14 @@ const UpdateUser = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  InputLabelProps={{ shrink: true }} // ✅ FIXED
                   InputProps={{
                     startAdornment: <Mail className="text-gray-400 mr-2" />,
                   }}
                 />
 
                 <FormControl fullWidth>
-                  <InputLabel>Role</InputLabel>
+                  <InputLabel shrink>Role</InputLabel> {/* ✅ FIXED */}
                   <Select
                     value={role}
                     onChange={(e) => setRole(e.target.value)}
@@ -177,7 +136,6 @@ const UpdateUser = () => {
                       <VerifiedUser className="text-gray-400 mr-2" />
                     }
                   >
-                    <MenuItem value="">Select Role</MenuItem>
                     <MenuItem value="admin">Admin</MenuItem>
                     <MenuItem value="user">User</MenuItem>
                   </Select>
@@ -185,7 +143,7 @@ const UpdateUser = () => {
 
                 <Button
                   type="submit"
-                  disabled={updateLoading}
+                  disabled={userDetailsLoading}
                   variant="contained"
                   fullWidth
                   sx={{
@@ -197,7 +155,7 @@ const UpdateUser = () => {
                     },
                   }}
                 >
-                  {updateLoading ? (
+                  {userDetailsLoading ? (
                     <CircularProgress size={24} color="inherit" />
                   ) : (
                     "Update User"

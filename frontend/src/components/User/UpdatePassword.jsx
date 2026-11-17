@@ -46,7 +46,9 @@ const UpdatePassword = () => {
       toast.error("Password must be at least 8 characters");
       return;
     }
-    dispatch(updatePassword({ oldPassword, newPassword, confirmPassword }));
+    dispatch(
+      updatePassword({ oldPassword, password: newPassword, confirmPassword }),
+    );
   };
 
   useEffect(() => {

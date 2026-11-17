@@ -1,16 +1,15 @@
-import cloudinary from "cloudinary";
+import { v2 as cloudinary } from "cloudinary";
+import dotenv from "dotenv";
+
+// Force dotenv to load the variables (just in case)
+dotenv.config({ path: "backend/config/config.env" });
+
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true,
 });
-
-/**
- * 📤 Upload file to Cloudinary
- * @param {string} file - Base64 image string
- * @param {string} folder - Folder name in Cloudinary
- * @returns {Object} { public_id, url }
- */
 
 export const upload_file = (file, folder) => {
   return new Promise((resolve, reject) => {
@@ -23,22 +22,16 @@ export const upload_file = (file, folder) => {
       (error, result) => {
         if (error) {
           reject(error);
-          return;
+        } else {
+          resolve({
+            public_id: result.public_id,
+            url: result.secure_url,
+          });
         }
-        resolve({
-          public_id: result.public_id,
-          url: result.secure_url,
-        });
       },
     );
   });
 };
-
-/**
- * 🗑️ Delete file from Cloudinary
- * @param {string} file - Public ID of the file to delete
- * @returns {boolean} - True if deleted successfully
- */
 
 export const delete_file = async (file) => {
   if (!file) return false;
